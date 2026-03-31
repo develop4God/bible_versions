@@ -2,8 +2,7 @@
 # ─────────────────────────────────────────────────────────────
 # THIS is the only file you need to edit.
 # - Add a new Bible version?        → add entry under languages
-# - Add a new consumer repo?        → add entry under consumers
-# - Change sync behavior?           → edit consumer trigger/path
+# - Add a new consumer repo?        → see consumers block (currently URL-fetch pattern)
 #
 # The GitHub Action reads this file and does everything else.
 # index.json is auto-generated — never edit it manually.
@@ -103,30 +102,28 @@ languages:
       SCH2000: "Schlachter 2000"
 
 # ── Consumers ─────────────────────────────────────────────────
-# Each consumer receives a fresh copy of index.json
-# when it changes. Requires SYNC_TOKEN secret in this repo.
+# index.json is fetched on-demand via URL — no sync needed.
+# Each consumer repo defines one constant:
 #
-# trigger options:
-#   on_index_change  → sync only when index.json content changes
-#   on_every_push    → sync on every push to main (rarely needed)
-
-consumers:
-  - name: DevocionalesAPI
-    repo: develop4God/DevocionalesAPI
-    branch: main
-    target_path: bible_config/index.json
-    trigger: on_index_change
-
-  - name: devocional_nuevo
-    repo: develop4God/devocional_nuevo
-    branch: main
-    target_path: assets/bible_config/index.json
-    trigger: on_index_change
-
-# ── Add future consumers here ─────────────────────────────────
-# Example:
-#   - name: NewApp
-#     repo: develop4God/new_app
+#   BIBLE_INDEX_URL = "https://raw.githubusercontent.com/develop4God/bible_versions/main/index.json"
+#
+# To activate cross-repo sync in the future, uncomment and configure:
+#
+# consumers:
+#   - name: DevocionalesAPI
+#     repo: develop4God/DevocionalesAPI
+#     branch: main
+#     target_path: bible_config/index.json
+#     trigger: on_index_change
+#
+#   - name: Devocionales-json
+#     repo: develop4God/Devocionales-json
+#     branch: main
+#     target_path: bible_config/index.json
+#     trigger: on_index_change
+#
+#   - name: devocional_nuevo
+#     repo: develop4God/devocional_nuevo
 #     branch: main
 #     target_path: assets/bible_config/index.json
 #     trigger: on_index_change
