@@ -70,8 +70,8 @@ Files follow the pattern: `{VERSION}_{LANG}.SQLite3[.gz]`
 
 Each Bible version is available in two formats:
 
-1. **Compressed files** (`.SQLite3.gz`) — Gzip-compressed for efficient downloads (~65–70% smaller)
-2. **Original SQLite files** (`.SQLite3`) — Uncompressed, for direct use without decompression
+**Compressed files** (`.SQLite3.gz`) — Gzip-compressed for efficient downloads (~65–70% smaller)
+
 
 To decompress a `.gz` file:
 ```bash
