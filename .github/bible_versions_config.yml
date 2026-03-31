@@ -1,0 +1,132 @@
+# bible_versions_config.yml
+# ─────────────────────────────────────────────────────────────
+# THIS is the only file you need to edit.
+# - Add a new Bible version?        → add entry under languages
+# - Add a new consumer repo?        → add entry under consumers
+# - Change sync behavior?           → edit consumer trigger/path
+#
+# The GitHub Action reads this file and does everything else.
+# index.json is auto-generated — never edit it manually.
+# ─────────────────────────────────────────────────────────────
+
+index:
+  output_file: index.json
+  base_url: "https://raw.githubusercontent.com/develop4God/bible_versions/main"
+  auto_rebuild: true          # rebuild index.json on every push to main
+
+# ── Bible versions ────────────────────────────────────────────
+# File naming convention: {VERSION}_{lang}.SQLite3.gz
+# Files must exist in the repo under the matching lang/ folder.
+
+languages:
+  en:
+    name: "English"
+    script: latin
+    primary_version: KJV
+    fallback_version: NIV
+    reading_speed: { unit: wpm, rate: 200 }
+    versions:
+      KJV: "King James Version"
+      NIV: "New International Version"
+      ESV: "English Standard Version"
+
+  es:
+    name: "Español"
+    script: latin
+    primary_version: RVR1960
+    fallback_version: NVI
+    reading_speed: { unit: wpm, rate: 200 }
+    versions:
+      RVR1960: "Reina-Valera 1960"
+      NVI: "Nueva Versión Internacional"
+      NTV: "Nueva Traducción Viviente"
+
+  pt:
+    name: "Português"
+    script: latin
+    primary_version: ARC
+    fallback_version: NVI
+    reading_speed: { unit: wpm, rate: 200 }
+    versions:
+      ARC: "Almeida Revista e Corrigida"
+      NVI: "Nova Versão Internacional"
+
+  fr:
+    name: "Français"
+    script: latin
+    primary_version: LSG1910
+    fallback_version: BDS
+    reading_speed: { unit: wpm, rate: 200 }
+    versions:
+      LSG1910: "Louis Segond 1910"
+      BDS: "Bible du Semeur"
+      NBS: "Nouvelle Bible Segond"
+
+  ja:
+    name: "日本語"
+    script: cjk
+    primary_version: SK2003
+    fallback_version: JCB
+    reading_speed: { unit: cpm, rate: 400 }
+    versions:
+      SK2003: "新改訳2003"
+      JCB: "リビングバイブル"
+
+  zh:
+    name: "中文"
+    script: cjk
+    primary_version: CUV1919
+    fallback_version: CNVS
+    reading_speed: { unit: cpm, rate: 400 }
+    versions:
+      CUV1919: "和合本1919"
+      CNVS: "新译本"
+
+  hi:
+    name: "हिन्दी"
+    script: devanagari
+    primary_version: HIOV
+    fallback_version: HERV
+    reading_speed: { unit: wpm, rate: 180 }
+    versions:
+      HIOV: "पवित्र बाइबिल (ओ.वी.)"
+      HERV: "पवित्र बाइबिल"
+
+  de:
+    name: "Deutsch"
+    script: latin
+    primary_version: LU17
+    fallback_version: SCH2000
+    reading_speed: { unit: wpm, rate: 200 }
+    versions:
+      LU17: "Luther 2017"
+      SCH2000: "Schlachter 2000"
+
+# ── Consumers ─────────────────────────────────────────────────
+# Each consumer receives a fresh copy of index.json
+# when it changes. Requires SYNC_TOKEN secret in this repo.
+#
+# trigger options:
+#   on_index_change  → sync only when index.json content changes
+#   on_every_push    → sync on every push to main (rarely needed)
+
+consumers:
+  - name: DevocionalesAPI
+    repo: develop4God/DevocionalesAPI
+    branch: main
+    target_path: bible_config/index.json
+    trigger: on_index_change
+
+  - name: devocional_nuevo
+    repo: develop4God/devocional_nuevo
+    branch: main
+    target_path: assets/bible_config/index.json
+    trigger: on_index_change
+
+# ── Add future consumers here ─────────────────────────────────
+# Example:
+#   - name: NewApp
+#     repo: develop4God/new_app
+#     branch: main
+#     target_path: assets/bible_config/index.json
+#     trigger: on_index_change
