@@ -1,0 +1,57 @@
+# .github/workflows/sync_index.yml
+# ─────────────────────────────────────────────────────────────────────────────
+# Regenerates index.json on every push to main.
+# Commits back only if content changed (ignores date-only diffs).
+# Consumers fetch index.json on-demand via raw.githubusercontent.com URL.
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: Generate index.json
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "**/*.SQLite3.gz"
+      - ".github/bible_versions_config.yml"
+      - "scripts/generate_index.py"
+
+  # Allow manual trigger from Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    name: Generate & commit index.json
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Run generate_index.py
+        run: python3 scripts/generate_index.py
+
+      - name: Commit index.json if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.json
+          if git diff --cached --quiet; then
+            echo "index.json unchanged — nothing to commit"
+          else
+            git commit -m "chore: regenerate index.json [skip ci]"
+            git push
+          fi
