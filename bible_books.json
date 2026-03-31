@@ -1,0 +1,211 @@
+{
+  "_comment": "SOT for Bible book lookup. book_number follows the MySword/TheWord open DB standard — identical across all language DBs (KJV, LU17, NVI, etc.). Agent usage: given an EN book name, get book_number, then query any language DB with: SELECT long_name FROM books WHERE book_number = <number>. That returns the full native book name for cita building.",
+  "meta": {
+    "version": "1.0.0",
+    "updated": "2026-03-31",
+    "source": "Auto-generated from KJV_en.SQLite3.gz books table. Validated against LU17_de — all 66 canonical book_numbers match exactly. Gaps (170-180, 270-280, 320, 462-464, 790) are deuterocanonical slots present in some versions (e.g. LU17)."
+  },
+  "books": {
+    "Genesis": {
+      "book_number": 10
+    },
+    "Exodus": {
+      "book_number": 20
+    },
+    "Leviticus": {
+      "book_number": 30
+    },
+    "Numbers": {
+      "book_number": 40
+    },
+    "Deuteronomy": {
+      "book_number": 50
+    },
+    "Joshua": {
+      "book_number": 60
+    },
+    "Judges": {
+      "book_number": 70
+    },
+    "Ruth": {
+      "book_number": 80
+    },
+    "1 Samuel": {
+      "book_number": 90
+    },
+    "2 Samuel": {
+      "book_number": 100
+    },
+    "1 Kings": {
+      "book_number": 110
+    },
+    "2 Kings": {
+      "book_number": 120
+    },
+    "1 Chronicles": {
+      "book_number": 130
+    },
+    "2 Chronicles": {
+      "book_number": 140
+    },
+    "Ezra": {
+      "book_number": 150
+    },
+    "Nehemiah": {
+      "book_number": 160
+    },
+    "Esther": {
+      "book_number": 190
+    },
+    "Job": {
+      "book_number": 220
+    },
+    "Psalms": {
+      "book_number": 230
+    },
+    "Proverbs": {
+      "book_number": 240
+    },
+    "Ecclesiastes": {
+      "book_number": 250
+    },
+    "Song of Solomon": {
+      "book_number": 260
+    },
+    "Isaiah": {
+      "book_number": 290
+    },
+    "Jeremiah": {
+      "book_number": 300
+    },
+    "Lamentations\n": {
+      "book_number": 310
+    },
+    "Ezekiel": {
+      "book_number": 330
+    },
+    "Daniel": {
+      "book_number": 340
+    },
+    "Hosea": {
+      "book_number": 350
+    },
+    "Joel": {
+      "book_number": 360
+    },
+    "Amos": {
+      "book_number": 370
+    },
+    "Obadiah": {
+      "book_number": 380
+    },
+    "Jonah": {
+      "book_number": 390
+    },
+    "Micah": {
+      "book_number": 400
+    },
+    "Nahum": {
+      "book_number": 410
+    },
+    "Habakkuk": {
+      "book_number": 420
+    },
+    "Zephaniah": {
+      "book_number": 430
+    },
+    "Haggai": {
+      "book_number": 440
+    },
+    "Zechariah": {
+      "book_number": 450
+    },
+    "Malachi": {
+      "book_number": 460
+    },
+    "Matthew": {
+      "book_number": 470
+    },
+    "Mark": {
+      "book_number": 480
+    },
+    "Luke": {
+      "book_number": 490
+    },
+    "John": {
+      "book_number": 500
+    },
+    "Acts": {
+      "book_number": 510
+    },
+    "Romans": {
+      "book_number": 520
+    },
+    "1 Corinthians": {
+      "book_number": 530
+    },
+    "2 Corinthians": {
+      "book_number": 540
+    },
+    "Galatians": {
+      "book_number": 550
+    },
+    "Ephesians": {
+      "book_number": 560
+    },
+    "Philippians": {
+      "book_number": 570
+    },
+    "Colossians": {
+      "book_number": 580
+    },
+    "1 Thessalonians": {
+      "book_number": 590
+    },
+    "2 Thessalonians": {
+      "book_number": 600
+    },
+    "1 Timothy": {
+      "book_number": 610
+    },
+    "2 Timothy": {
+      "book_number": 620
+    },
+    "Titus": {
+      "book_number": 630
+    },
+    "Philemon": {
+      "book_number": 640
+    },
+    "Hebrews": {
+      "book_number": 650
+    },
+    "James": {
+      "book_number": 660
+    },
+    "1 Peter": {
+      "book_number": 670
+    },
+    "2 Peter": {
+      "book_number": 680
+    },
+    "1 John": {
+      "book_number": 690
+    },
+    "2 John": {
+      "book_number": 700
+    },
+    "3 John": {
+      "book_number": 710
+    },
+    "Jude": {
+      "book_number": 720
+    },
+    "Revelation": {
+      "book_number": 730
+    },
+    "Psalm": {
+      "book_number": 230
+    }
+  }
+}
