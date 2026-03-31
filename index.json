@@ -1,0 +1,156 @@
+{
+  "versions": [
+    {
+      "id": "KJV_en",
+      "name": "King James Version",
+      "abbreviation": "KJV",
+      "language": "English",
+      "languageCode": "en",
+      "file": "KJV_en.SQLite3.gz"
+    },
+    {
+      "id": "NIV_en",
+      "name": "New International Version",
+      "abbreviation": "NIV",
+      "language": "English",
+      "languageCode": "en",
+      "file": "NIV_en.SQLite3.gz"
+    },
+    {
+      "id": "ESV_en",
+      "name": "English Standard Version",
+      "abbreviation": "ESV",
+      "language": "English",
+      "languageCode": "en",
+      "file": "ESV_en.SQLite3.gz"
+    },
+    {
+      "id": "NVI_es",
+      "name": "Nueva Versión Internacional",
+      "abbreviation": "NVI",
+      "language": "Español",
+      "languageCode": "es",
+      "file": "NVI_es.SQLite3.gz"
+    },
+    {
+      "id": "RVR1960_es",
+      "name": "Reina-Valera 1960",
+      "abbreviation": "RVR1960",
+      "language": "Español",
+      "languageCode": "es",
+      "file": "RVR1960_es.SQLite3.gz"
+    },
+    {
+      "id": "NTV_es",
+      "name": "Nueva Traducción Viviente",
+      "abbreviation": "NTV",
+      "language": "Español",
+      "languageCode": "es",
+      "file": "NTV_es.SQLite3.gz"
+    },
+    {
+      "id": "LSG1910_fr",
+      "name": "Louis Segond 1910",
+      "abbreviation": "LSG1910",
+      "language": "Français",
+      "languageCode": "fr",
+      "file": "LSG1910_fr.SQLite3.gz"
+    },
+    {
+      "id": "BDS_fr",
+      "name": "Bible du Semeur",
+      "abbreviation": "BDS",
+      "language": "Français",
+      "languageCode": "fr",
+      "file": "BDS_fr.SQLite3.gz"
+    },
+    {
+      "id": "NBS_fr",
+      "name": "Nouvelle Bible Segond",
+      "abbreviation": "NBS",
+      "language": "Français",
+      "languageCode": "fr",
+      "file": "NBS_fr.SQLite3.gz"
+    },
+    {
+      "id": "SK2003_ja",
+      "name": "新改訳2003",
+      "abbreviation": "SK2003",
+      "language": "日本語",
+      "languageCode": "ja",
+      "file": "SK2003_ja.SQLite3.gz"
+    },
+    {
+      "id": "JCB_ja",
+      "name": "リビングバイブル",
+      "abbreviation": "JCB",
+      "language": "日本語",
+      "languageCode": "ja",
+      "file": "JCB_ja.SQLite3.gz"
+    },
+    {
+      "id": "ARC_pt",
+      "name": "Almeida Revista e Corrigida",
+      "abbreviation": "ARC",
+      "language": "Português",
+      "languageCode": "pt",
+      "file": "ARC_pt.SQLite3.gz"
+    },
+    {
+      "id": "NVI_pt",
+      "name": "Nova Versão Internacional",
+      "abbreviation": "NVI",
+      "language": "Português",
+      "languageCode": "pt",
+      "file": "NVI_pt.SQLite3.gz"
+    },
+    {
+      "id": "CUV1919_zh",
+      "name": "和合本1919",
+      "abbreviation": "CUV1919",
+      "language": "中文",
+      "languageCode": "zh",
+      "file": "CUV1919_zh.SQLite3.gz"
+    },
+    {
+      "id": "CNVS_zh",
+      "name": "新译本",
+      "abbreviation": "CNVS",
+      "language": "中文",
+      "languageCode": "zh",
+      "file": "CNVS_zh.SQLite3.gz"
+    },
+    {
+      "id": "HIOV_hi",
+      "name": "पवित्र बाइबिल (ओ.वी.)",
+      "abbreviation": "HIOV",
+      "language": "हिन्दी",
+      "languageCode": "hi",
+      "file": "HIOV_hi.SQLite3.gz"
+    },
+    {
+      "id": "HERV_hi",
+      "name": "पवित्र बाइबिल (HERV)",
+      "abbreviation": "HERV",
+      "language": "हिन्दी",
+      "languageCode": "hi",
+      "file": "HERV_hi.SQLite3.gz"
+    },
+    {
+      "id": "LU17_de",
+      "name": "Lutherbibel 2017",
+      "abbreviation": "LU17",
+      "language": "Deutsch",
+      "languageCode": "de",
+      "file": "LU17_de.SQLite3.gz"
+    },
+    {
+      "id": "SCH2000_de",
+      "name": "Schlachter 2000",
+      "abbreviation": "SCH2000",
+      "language": "Deutsch",
+      "languageCode": "de",
+      "file": "SCH2000_de.SQLite3.gz"
+    }
+  ]
+}
