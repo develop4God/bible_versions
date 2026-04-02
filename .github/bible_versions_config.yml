@@ -101,6 +101,16 @@ languages:
       LU17: "Luther 2017"
       SCH2000: "Schlachter 2000"
 
+  ar:
+    name: "العربية"
+    script: arabic
+    primary_version: NAV
+    fallback_version: SVDA
+    reading_speed: { unit: wpm, rate: 150 }
+    versions:
+      NAV: "الترجمة العربية الجديدة"
+      SVDA: "ترجمة سميث وفاندايك"
+
 # ── Consumers ─────────────────────────────────────────────────
 # index.json is fetched on-demand via URL — no sync needed.
 # Each consumer repo defines one constant:
