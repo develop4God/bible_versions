@@ -111,14 +111,14 @@ languages:
       NAV: "الترجمة العربية الجديدة"
       SVDA: "ترجمة سميث وفاندايك"
 
-  tl:
-    name: "Tagalog"
+  fil:
+    name: "Filipino"
     script: latin
-    primary_version: ADB
+    primary_version: MBB05
     fallback_version: ASND
     reading_speed: { unit: wpm, rate: 200 }
     versions:
-      ADB: "Ang Dating Biblia"
+      MBB05: "Magandang Balita Biblia"
       ASND: "Ang Salita ng Dios"
 
 # ── Consumers ─────────────────────────────────────────────────
