@@ -54,7 +54,7 @@ def build_version_tables(languages: dict) -> str:
     """Builds the per-language markdown tables from config."""
     blocks = []
     for lang, lang_data in languages.items():
-        rows = [f"### {lang_data['name']} (`{lang}`)", "| ID | Name | File |", "|----|------|------|"]
+        rows = [f"### `{lang}` — {lang_data['name']}", "| ID | Name | File |", "|----|------|------|"]
         for version_id, version_name in lang_data["versions"].items():
             filename = f"{version_id}_{lang}.SQLite3.gz"
             rows.append(f"| {version_id} | {version_name} | `{filename}` |")
