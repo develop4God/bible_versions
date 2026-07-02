@@ -79,3 +79,30 @@ gunzip <filename>.SQLite3.gz
 ```
 
 Or use gzip-compatible decompression libraries in your application.
+
+## Verse Resolver
+
+[`scripts/verse_resolver.py`](scripts/verse_resolver.py) resolves English Bible references (e.g. `"John 3:16"`, `"1 Corinthians 13:4-7"`) to native-language citations and verse text from any of the SQLite databases in this repo.
+
+You always call it with the **English** book name, regardless of which language database you're querying. [`bible_books.json`](bible_books.json) is the source of truth mapping EN book names to a `book_number` that's identical across all language DBs (MySword/TheWord standard). The resolver uses that number to look up the native book name directly from the target DB's own `books` table — so there's no manual per-language name mapping to maintain, and no need to translate book names yourself for each Bible version.
+
+```python
+from verse_resolver import VerseResolver
+
+with VerseResolver("en/KJV_en.SQLite3.gz") as r:
+    cita, texto, error = r.resolve("John 3:16")
+    # cita  -> "John 3:16"
+    # texto -> verse text from the DB
+```
+
+It's a standalone, reusable module — copy it into any project that needs to resolve references against these databases.
+
+## Contributing
+
+If you'd like to suggest a new version or language, report an issue with the data, or propose an improvement, please open an issue or pull request. Or just contact us!.
+
+**Roadmap:** a hosted API for this data is under consideration.
+
+## Contact
+
+Questions or support: develop4god@gmail.com
