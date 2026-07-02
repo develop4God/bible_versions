@@ -6,12 +6,12 @@
 ![Versions](https://img.shields.io/badge/versions-23-brightgreen.svg)
 <!-- AUTO-GENERATED:BADGES:END -->
 
-Bible versions assets for bible core apps
+Bible versions assets for [Develop4God](https://www.develop4God.com) ministry apps — for God's glory, in service of our mission (Isaiah 55:10-11).
 
 ## Available Bible Versions
 
 This repository contains SQLite database files for various Bible translations in multiple languages.
-All files are stored in a flat structure at the root of the repository, named `{VERSION}_{LANG}.SQLite3[.gz]`.
+Files are organized in per-language folders (`{LANG}/{VERSION}_{LANG}.SQLite3[.gz]`), e.g. `en/KJV_en.SQLite3.gz`.
 
 A machine-readable index of all versions is available in [`index.json`](index.json).
 
