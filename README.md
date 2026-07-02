@@ -82,10 +82,10 @@ A machine-readable index of all versions is available in [`index.json`](index.js
 
 ## File Naming Convention
 
-Files follow the pattern: `{VERSION}_{LANG}.SQLite3[.gz]`
+Files live under a per-language folder and follow the pattern: `{LANG}/{VERSION}_{LANG}.SQLite3[.gz]`
 
+- `{LANG}` — language code (ISO 639-1 for most, e.g. `en`, `es`, `fr`, `ja`, `pt`, `zh`, `hi`, `de`, `ar`; `fil` is ISO 639-2 for Filipino)
 - `{VERSION}` — Bible version abbreviation (e.g., `KJV`, `NVI`, `RVR1960`)
-- `{LANG}` — ISO 639-1 language code (e.g., `en`, `es`, `fr`, `ja`, `pt`, `zh`, `hi`, `de`)
 
 ## File Formats
 
