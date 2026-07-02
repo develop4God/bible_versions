@@ -1,4 +1,5 @@
 # 📖 Bible Databases ✝️
+### `bible_versions`
 
 <!-- AUTO-GENERATED:BADGES:START -->
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
