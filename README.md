@@ -1,8 +1,10 @@
 # bible_versions
 
+<!-- AUTO-GENERATED:BADGES:START -->
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Languages](https://img.shields.io/badge/languages-10-brightgreen.svg)
 ![Versions](https://img.shields.io/badge/versions-23-brightgreen.svg)
+<!-- AUTO-GENERATED:BADGES:END -->
 
 Bible versions assets for bible core apps
 
@@ -13,6 +15,7 @@ All files are stored in a flat structure at the root of the repository, named `{
 
 A machine-readable index of all versions is available in [`index.json`](index.json).
 
+<!-- AUTO-GENERATED:VERSION-TABLES:START -->
 ### English (`en`)
 | ID | Name | File |
 |----|------|------|
@@ -23,9 +26,15 @@ A machine-readable index of all versions is available in [`index.json`](index.js
 ### Spanish (`es`)
 | ID | Name | File |
 |----|------|------|
-| NVI | Nueva Versión Internacional | `NVI_es.SQLite3.gz` |
 | RVR1960 | Reina-Valera 1960 | `RVR1960_es.SQLite3.gz` |
+| NVI | Nueva Versión Internacional | `NVI_es.SQLite3.gz` |
 | NTV | Nueva Traducción Viviente | `NTV_es.SQLite3.gz` |
+
+### Portuguese (`pt`)
+| ID | Name | File |
+|----|------|------|
+| ARC | Almeida Revista e Corrigida | `ARC_pt.SQLite3.gz` |
+| NVI | Nova Versão Internacional | `NVI_pt.SQLite3.gz` |
 
 ### French (`fr`)
 | ID | Name | File |
@@ -40,12 +49,6 @@ A machine-readable index of all versions is available in [`index.json`](index.js
 | SK2003 | 新改訳2003 | `SK2003_ja.SQLite3.gz` |
 | JCB | リビングバイブル | `JCB_ja.SQLite3.gz` |
 
-### Portuguese (`pt`)
-| ID | Name | File |
-|----|------|------|
-| ARC | Almeida Revista e Corrigida | `ARC_pt.SQLite3.gz` |
-| NVI | Nova Versão Internacional | `NVI_pt.SQLite3.gz` |
-
 ### Chinese (`zh`)
 | ID | Name | File |
 |----|------|------|
@@ -56,12 +59,12 @@ A machine-readable index of all versions is available in [`index.json`](index.js
 | ID | Name | File |
 |----|------|------|
 | HIOV | पवित्र बाइबिल (ओ.वी.) | `HIOV_hi.SQLite3.gz` |
-| HERV | पवित्र बाइबिल (HERV) | `HERV_hi.SQLite3.gz` |
+| HERV | पवित्र बाइबिल | `HERV_hi.SQLite3.gz` |
 
 ### German (`de`)
 | ID | Name | File |
 |----|------|------|
-| LU17 | Lutherbibel 2017 | `LU17_de.SQLite3.gz` |
+| LU17 | Luther 2017 | `LU17_de.SQLite3.gz` |
 | SCH2000 | Schlachter 2000 | `SCH2000_de.SQLite3.gz` |
 
 ### Arabic (`ar`)
@@ -75,6 +78,7 @@ A machine-readable index of all versions is available in [`index.json`](index.js
 |----|------|------|
 | MBB05 | Magandang Balita Biblia | `MBB05_fil.SQLite3.gz` |
 | ASND | Ang Salita ng Dios | `ASND_fil.SQLite3.gz` |
+<!-- AUTO-GENERATED:VERSION-TABLES:END -->
 
 ## File Naming Convention
 
