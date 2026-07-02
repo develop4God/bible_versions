@@ -1,4 +1,9 @@
 # bible_versions
+
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Languages](https://img.shields.io/badge/languages-10-brightgreen.svg)
+![Versions](https://img.shields.io/badge/versions-23-brightgreen.svg)
+
 Bible versions assets for bible core apps
 
 ## Available Bible Versions
@@ -59,6 +64,18 @@ A machine-readable index of all versions is available in [`index.json`](index.js
 | LU17 | Lutherbibel 2017 | `LU17_de.SQLite3.gz` |
 | SCH2000 | Schlachter 2000 | `SCH2000_de.SQLite3.gz` |
 
+### Arabic (`ar`)
+| ID | Name | File |
+|----|------|------|
+| NAV | الترجمة العربية الجديدة | `NAV_ar.SQLite3.gz` |
+| SVDA | ترجمة سميث وفاندايك | `SVDA_ar.SQLite3.gz` |
+
+### Filipino (`fil`)
+| ID | Name | File |
+|----|------|------|
+| MBB05 | Magandang Balita Biblia | `MBB05_fil.SQLite3.gz` |
+| ASND | Ang Salita ng Dios | `ASND_fil.SQLite3.gz` |
+
 ## File Naming Convention
 
 Files follow the pattern: `{VERSION}_{LANG}.SQLite3[.gz]`
@@ -103,6 +120,15 @@ If you'd like to suggest a new version or language, report an issue with the dat
 
 **Roadmap:** a hosted API for this data is under consideration.
 
+## Copyright & Disclaimer
+
+The Bible translation databases in this repository are sourced from [MyBible (ph4.org)](https://www.ph4.org/b4_1.php?l=en). Each translation retains its own copyright and license terms as set by its respective publisher/rights holder — some (e.g. KJV, LSG1910) are public domain, while others (e.g. NIV, ESV) are commercially copyrighted with restrictions on redistribution and usage.
+
+This repository does not claim ownership of any Bible text. For authoritative licensing and attribution details on a specific translation, refer to [ph4.org](https://www.ph4.org/b4_1.php?l=en). If you plan to redistribute or use these texts beyond personal/app-internal use, verify the license terms for that specific version first.
+
+The code in this repository (scripts, index generation, tooling) is licensed under the [MIT License](LICENSE).
+
 ## Contact
 
 Questions or support: develop4god@gmail.com
+Website: [www.develop4God.com](https://www.develop4God.com)
