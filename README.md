@@ -23,51 +23,51 @@ A machine-readable index of all versions is available in [`index.json`](index.js
 | NIV | New International Version | `NIV_en.SQLite3.gz` |
 | ESV | English Standard Version | `ESV_en.SQLite3.gz` |
 
-### Spanish (`es`)
+### Español (`es`)
 | ID | Name | File |
 |----|------|------|
 | RVR1960 | Reina-Valera 1960 | `RVR1960_es.SQLite3.gz` |
 | NVI | Nueva Versión Internacional | `NVI_es.SQLite3.gz` |
 | NTV | Nueva Traducción Viviente | `NTV_es.SQLite3.gz` |
 
-### Portuguese (`pt`)
+### Português (`pt`)
 | ID | Name | File |
 |----|------|------|
 | ARC | Almeida Revista e Corrigida | `ARC_pt.SQLite3.gz` |
 | NVI | Nova Versão Internacional | `NVI_pt.SQLite3.gz` |
 
-### French (`fr`)
+### Français (`fr`)
 | ID | Name | File |
 |----|------|------|
 | LSG1910 | Louis Segond 1910 | `LSG1910_fr.SQLite3.gz` |
 | BDS | Bible du Semeur | `BDS_fr.SQLite3.gz` |
 | NBS | Nouvelle Bible Segond | `NBS_fr.SQLite3.gz` |
 
-### Japanese (`ja`)
+### 日本語 (`ja`)
 | ID | Name | File |
 |----|------|------|
 | SK2003 | 新改訳2003 | `SK2003_ja.SQLite3.gz` |
 | JCB | リビングバイブル | `JCB_ja.SQLite3.gz` |
 
-### Chinese (`zh`)
+### 中文 (`zh`)
 | ID | Name | File |
 |----|------|------|
 | CUV1919 | 和合本1919 | `CUV1919_zh.SQLite3.gz` |
 | CNVS | 新译本 | `CNVS_zh.SQLite3.gz` |
 
-### Hindi (`hi`)
+### हिन्दी (`hi`)
 | ID | Name | File |
 |----|------|------|
 | HIOV | पवित्र बाइबिल (ओ.वी.) | `HIOV_hi.SQLite3.gz` |
 | HERV | पवित्र बाइबिल | `HERV_hi.SQLite3.gz` |
 
-### German (`de`)
+### Deutsch (`de`)
 | ID | Name | File |
 |----|------|------|
 | LU17 | Luther 2017 | `LU17_de.SQLite3.gz` |
 | SCH2000 | Schlachter 2000 | `SCH2000_de.SQLite3.gz` |
 
-### Arabic (`ar`)
+### العربية (`ar`)
 | ID | Name | File |
 |----|------|------|
 | NAV | الترجمة العربية الجديدة | `NAV_ar.SQLite3.gz` |

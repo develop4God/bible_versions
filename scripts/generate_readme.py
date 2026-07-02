@@ -29,20 +29,6 @@ REPO_ROOT   = Path(__file__).parent.parent
 CONFIG_PATH = REPO_ROOT / ".github" / "bible_versions_config.yml"
 README_PATH = REPO_ROOT / "README.md"
 
-# English display names for language section headers
-LANG_DISPLAY_NAME_EN = {
-    "en":  "English",
-    "es":  "Spanish",
-    "pt":  "Portuguese",
-    "fr":  "French",
-    "ja":  "Japanese",
-    "zh":  "Chinese",
-    "hi":  "Hindi",
-    "de":  "German",
-    "ar":  "Arabic",
-    "fil": "Filipino",
-}
-
 
 def load_config() -> dict:
     if not CONFIG_PATH.exists():
@@ -68,8 +54,7 @@ def build_version_tables(languages: dict) -> str:
     """Builds the per-language markdown tables from config."""
     blocks = []
     for lang, lang_data in languages.items():
-        display_name = LANG_DISPLAY_NAME_EN.get(lang, lang_data["name"])
-        rows = [f"### {display_name} (`{lang}`)", "| ID | Name | File |", "|----|------|------|"]
+        rows = [f"### {lang_data['name']} (`{lang}`)", "| ID | Name | File |", "|----|------|------|"]
         for version_id, version_name in lang_data["versions"].items():
             filename = f"{version_id}_{lang}.SQLite3.gz"
             rows.append(f"| {version_id} | {version_name} | `{filename}` |")
