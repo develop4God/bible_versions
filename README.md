@@ -4,7 +4,7 @@
 <!-- AUTO-GENERATED:BADGES:START -->
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Languages](https://img.shields.io/badge/languages-10-brightgreen.svg)
-![Versions](https://img.shields.io/badge/versions-25-brightgreen.svg)
+![Versions](https://img.shields.io/badge/versions-26-brightgreen.svg)
 <!-- AUTO-GENERATED:BADGES:END -->
 
 Bible versions assets for [Develop4God](https://www.develop4God.com) ministry apps — for God's glory, in service of our mission (Isaiah 55:10-11).
@@ -20,8 +20,9 @@ A machine-readable index of all versions is available in [`index.json`](index.js
 ### `en` — English
 | ID | Name | File | Strong's |
 |----|------|------|----------|
-| KJV | King James Version | `KJV_en.SQLite3.gz` | — |
+| KJV | King James Version | `KJV_en.SQLite3.gz` | ✅ |
 | NIV | New International Version | `NIV_en.SQLite3.gz` | — |
+| KJ2000 | King James 2000 | `KJ2000_en.SQLite3.gz` | — |
 | ESV | English Standard Version | `ESV_en.SQLite3.gz` | — |
 
 ### `es` — Español

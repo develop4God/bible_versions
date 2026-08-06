@@ -18,15 +18,22 @@
       "versions": {
         "KJV": {
           "name": "King James Version",
-          "strong": false,
+          "strong": true,
           "file": "KJV_en.SQLite3.gz",
-          "url": "https://raw.githubusercontent.com/develop4God/bible_versions/main/en/KJV_en.SQLite3.gz"
+          "url": "https://raw.githubusercontent.com/develop4God/bible_versions/main/en/KJV_en.SQLite3.gz",
+          "disclaimer": "Public Domain (King James Version, 1611/1769)."
         },
         "NIV": {
           "name": "New International Version",
           "strong": false,
           "file": "NIV_en.SQLite3.gz",
           "url": "https://raw.githubusercontent.com/develop4God/bible_versions/main/en/NIV_en.SQLite3.gz"
+        },
+        "KJ2000": {
+          "name": "King James 2000",
+          "strong": false,
+          "file": "KJ2000_en.SQLite3.gz",
+          "url": "https://raw.githubusercontent.com/develop4God/bible_versions/main/en/KJ2000_en.SQLite3.gz"
         },
         "ESV": {
           "name": "English Standard Version",

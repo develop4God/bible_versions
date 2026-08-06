@@ -29,8 +29,9 @@ languages:
     fallback_version: NIV
     reading_speed: { unit: wpm, rate: 200 }
     versions:
-      KJV: { name: "King James Version", strong: false }
+      KJV: { name: "King James Version", strong: true, disclaimer: "Public Domain (King James Version, 1611/1769)." }
       NIV: { name: "New International Version", strong: false }
+      KJ2000: { name: "King James 2000", strong: false }
       ESV: { name: "English Standard Version", strong: false }
 
   es:
