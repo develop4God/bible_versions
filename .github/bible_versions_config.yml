@@ -54,7 +54,7 @@ languages:
     versions:
       ARC: { name: "Almeida Revista e Corrigida", strong: false }
       NVI: { name: "Nova Versão Internacional", strong: false }
-      ARA: { name: "Almeida Revista e Atualizada", strong: false }
+      ARA: { name: "Almeida Revista e Atualizada", strong: false, disclaimer: "© 1993 Sociedade Bíblica do Brasil. Todos os direitos reservados." }
 
   fr:
     name: "Français"
