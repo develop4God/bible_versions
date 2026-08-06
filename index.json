@@ -94,6 +94,12 @@
           "strong": false,
           "file": "NVI_pt.SQLite3.gz",
           "url": "https://raw.githubusercontent.com/develop4God/bible_versions/main/pt/NVI_pt.SQLite3.gz"
+        },
+        "ARA": {
+          "name": "Almeida Revista e Atualizada",
+          "strong": false,
+          "file": "ARA_pt.SQLite3.gz",
+          "url": "https://raw.githubusercontent.com/develop4God/bible_versions/main/pt/ARA_pt.SQLite3.gz"
         }
       }
     },
