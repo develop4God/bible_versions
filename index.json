@@ -72,7 +72,7 @@
           "url": "https://raw.githubusercontent.com/develop4God/bible_versions/main/es/NTV_es.SQLite3.gz"
         },
         "RVR1909": {
-          "name": "Reina-Valera 1909 (con Números Strong)",
+          "name": "Reina-Valera 1909",
           "strong": true,
           "file": "RVR1909_es.SQLite3.gz",
           "url": "https://raw.githubusercontent.com/develop4God/bible_versions/main/es/RVR1909_es.SQLite3.gz",

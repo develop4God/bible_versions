@@ -31,7 +31,7 @@ A machine-readable index of all versions is available in [`index.json`](index.js
 | RVR1960 | Reina-Valera 1960 | `RVR1960_es.SQLite3.gz` | — |
 | NVI | Nueva Versión Internacional | `NVI_es.SQLite3.gz` | — |
 | NTV | Nueva Traducción Viviente | `NTV_es.SQLite3.gz` | — |
-| RVR1909 | Reina-Valera 1909 (con Números Strong) | `RVR1909_es.SQLite3.gz` | ✅ |
+| RVR1909 | Reina-Valera 1909 | `RVR1909_es.SQLite3.gz` | ✅ |
 
 ### `pt` — Português
 | ID | Name | File | Strong's |
