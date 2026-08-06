@@ -4,7 +4,7 @@
 <!-- AUTO-GENERATED:BADGES:START -->
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Languages](https://img.shields.io/badge/languages-10-brightgreen.svg)
-![Versions](https://img.shields.io/badge/versions-23-brightgreen.svg)
+![Versions](https://img.shields.io/badge/versions-24-brightgreen.svg)
 <!-- AUTO-GENERATED:BADGES:END -->
 
 Bible versions assets for [Develop4God](https://www.develop4God.com) ministry apps — for God's glory, in service of our mission (Isaiah 55:10-11).
@@ -18,67 +18,68 @@ A machine-readable index of all versions is available in [`index.json`](index.js
 
 <!-- AUTO-GENERATED:VERSION-TABLES:START -->
 ### `en` — English
-| ID | Name | File |
-|----|------|------|
-| KJV | King James Version | `KJV_en.SQLite3.gz` |
-| NIV | New International Version | `NIV_en.SQLite3.gz` |
-| ESV | English Standard Version | `ESV_en.SQLite3.gz` |
+| ID | Name | File | Strong's |
+|----|------|------|----------|
+| KJV | King James Version | `KJV_en.SQLite3.gz` | — |
+| NIV | New International Version | `NIV_en.SQLite3.gz` | — |
+| ESV | English Standard Version | `ESV_en.SQLite3.gz` | — |
 
 ### `es` — Español
-| ID | Name | File |
-|----|------|------|
-| RVR1960 | Reina-Valera 1960 | `RVR1960_es.SQLite3.gz` |
-| NVI | Nueva Versión Internacional | `NVI_es.SQLite3.gz` |
-| NTV | Nueva Traducción Viviente | `NTV_es.SQLite3.gz` |
+| ID | Name | File | Strong's |
+|----|------|------|----------|
+| RVR1960 | Reina-Valera 1960 | `RVR1960_es.SQLite3.gz` | — |
+| NVI | Nueva Versión Internacional | `NVI_es.SQLite3.gz` | — |
+| NTV | Nueva Traducción Viviente | `NTV_es.SQLite3.gz` | — |
+| RVR1909 | Reina-Valera 1909 (con Números Strong) | `RVR1909_es.SQLite3.gz` | ✅ |
 
 ### `pt` — Português
-| ID | Name | File |
-|----|------|------|
-| ARC | Almeida Revista e Corrigida | `ARC_pt.SQLite3.gz` |
-| NVI | Nova Versão Internacional | `NVI_pt.SQLite3.gz` |
+| ID | Name | File | Strong's |
+|----|------|------|----------|
+| ARC | Almeida Revista e Corrigida | `ARC_pt.SQLite3.gz` | — |
+| NVI | Nova Versão Internacional | `NVI_pt.SQLite3.gz` | — |
 
 ### `fr` — Français
-| ID | Name | File |
-|----|------|------|
-| LSG1910 | Louis Segond 1910 | `LSG1910_fr.SQLite3.gz` |
-| BDS | Bible du Semeur | `BDS_fr.SQLite3.gz` |
-| NBS | Nouvelle Bible Segond | `NBS_fr.SQLite3.gz` |
+| ID | Name | File | Strong's |
+|----|------|------|----------|
+| LSG1910 | Louis Segond 1910 | `LSG1910_fr.SQLite3.gz` | — |
+| BDS | Bible du Semeur | `BDS_fr.SQLite3.gz` | — |
+| NBS | Nouvelle Bible Segond | `NBS_fr.SQLite3.gz` | — |
 
 ### `ja` — 日本語
-| ID | Name | File |
-|----|------|------|
-| SK2003 | 新改訳2003 | `SK2003_ja.SQLite3.gz` |
-| JCB | リビングバイブル | `JCB_ja.SQLite3.gz` |
+| ID | Name | File | Strong's |
+|----|------|------|----------|
+| SK2003 | 新改訳2003 | `SK2003_ja.SQLite3.gz` | — |
+| JCB | リビングバイブル | `JCB_ja.SQLite3.gz` | — |
 
 ### `zh` — 中文
-| ID | Name | File |
-|----|------|------|
-| CUV1919 | 和合本1919 | `CUV1919_zh.SQLite3.gz` |
-| CNVS | 新译本 | `CNVS_zh.SQLite3.gz` |
+| ID | Name | File | Strong's |
+|----|------|------|----------|
+| CUV1919 | 和合本1919 | `CUV1919_zh.SQLite3.gz` | — |
+| CNVS | 新译本 | `CNVS_zh.SQLite3.gz` | — |
 
 ### `hi` — हिन्दी
-| ID | Name | File |
-|----|------|------|
-| HIOV | पवित्र बाइबिल (ओ.वी.) | `HIOV_hi.SQLite3.gz` |
-| HERV | पवित्र बाइबिल | `HERV_hi.SQLite3.gz` |
+| ID | Name | File | Strong's |
+|----|------|------|----------|
+| HIOV | पवित्र बाइबिल (ओ.वी.) | `HIOV_hi.SQLite3.gz` | — |
+| HERV | पवित्र बाइबिल | `HERV_hi.SQLite3.gz` | — |
 
 ### `de` — Deutsch
-| ID | Name | File |
-|----|------|------|
-| LU17 | Luther 2017 | `LU17_de.SQLite3.gz` |
-| SCH2000 | Schlachter 2000 | `SCH2000_de.SQLite3.gz` |
+| ID | Name | File | Strong's |
+|----|------|------|----------|
+| LU17 | Luther 2017 | `LU17_de.SQLite3.gz` | — |
+| SCH2000 | Schlachter 2000 | `SCH2000_de.SQLite3.gz` | — |
 
 ### `ar` — العربية
-| ID | Name | File |
-|----|------|------|
-| NAV | الترجمة العربية الجديدة | `NAV_ar.SQLite3.gz` |
-| SVDA | ترجمة سميث وفاندايك | `SVDA_ar.SQLite3.gz` |
+| ID | Name | File | Strong's |
+|----|------|------|----------|
+| NAV | الترجمة العربية الجديدة | `NAV_ar.SQLite3.gz` | — |
+| SVDA | ترجمة سميث وفاندايك | `SVDA_ar.SQLite3.gz` | — |
 
 ### `fil` — Filipino
-| ID | Name | File |
-|----|------|------|
-| MBB05 | Magandang Balita Biblia | `MBB05_fil.SQLite3.gz` |
-| ASND | Ang Salita ng Dios | `ASND_fil.SQLite3.gz` |
+| ID | Name | File | Strong's |
+|----|------|------|----------|
+| MBB05 | Magandang Balita Biblia | `MBB05_fil.SQLite3.gz` | — |
+| ASND | Ang Salita ng Dios | `ASND_fil.SQLite3.gz` | — |
 <!-- AUTO-GENERATED:VERSION-TABLES:END -->
 
 ## File Naming Convention

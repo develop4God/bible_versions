@@ -92,13 +92,17 @@ def build_index(config: dict) -> dict:
     out_languages = {}
     for lang, lang_data in languages.items():
         versions_out = {}
-        for version_id, version_name in lang_data["versions"].items():
+        for version_id, version_data in lang_data["versions"].items():
             filename = f"{version_id}_{lang}.SQLite3.gz"
-            versions_out[version_id] = {
-                "name": version_name,
-                "file": filename,
-                "url":  f"{base_url}/{lang}/{filename}",
+            entry = {
+                "name":   version_data["name"],
+                "strong": version_data["strong"],
+                "file":   filename,
+                "url":    f"{base_url}/{lang}/{filename}",
             }
+            if "disclaimer" in version_data:
+                entry["disclaimer"] = version_data["disclaimer"]
+            versions_out[version_id] = entry
 
         out_languages[lang] = {
             "name":             lang_data["name"],
