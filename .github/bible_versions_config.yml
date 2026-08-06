@@ -65,7 +65,7 @@ languages:
     versions:
       LSG1910: { name: "Louis Segond 1910", strong: false }
       BDS: { name: "Bible du Semeur", strong: false }
-      NBS: { name: "Nouvelle Bible Segond", strong: false }
+      NBS: { name: "Nouvelle Bible Segond", strong: false, disclaimer: "Copyright © 2002, Société biblique française. Avec autorisation. Tous droits réservés." }
 
   ja:
     name: "日本語"

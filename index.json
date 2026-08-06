@@ -130,7 +130,8 @@
           "name": "Nouvelle Bible Segond",
           "strong": false,
           "file": "NBS_fr.SQLite3.gz",
-          "url": "https://raw.githubusercontent.com/develop4God/bible_versions/main/fr/NBS_fr.SQLite3.gz"
+          "url": "https://raw.githubusercontent.com/develop4God/bible_versions/main/fr/NBS_fr.SQLite3.gz",
+          "disclaimer": "Copyright © 2002, Société biblique française. Avec autorisation. Tous droits réservés."
         }
       }
     },
