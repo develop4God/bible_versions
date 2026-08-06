@@ -44,7 +44,7 @@ languages:
       RVR1960: { name: "Reina-Valera 1960", strong: false }
       NVI: { name: "Nueva Versión Internacional", strong: false }
       NTV: { name: "Nueva Traducción Viviente", strong: false }
-      RVR1909: { name: "Reina-Valera 1909 (con Números Strong)", strong: true, disclaimer: "Texto de dominio público (Reina-Valera 1909)." }
+      RVR1909: { name: "Reina-Valera 1909", strong: true, disclaimer: "Texto de dominio público (Reina-Valera 1909)." }
 
   pt:
     name: "Português"
