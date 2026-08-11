@@ -45,6 +45,7 @@ languages:
       NVI: { name: "Nueva Versión Internacional", strong: false }
       NTV: { name: "Nueva Traducción Viviente", strong: false }
       RVR1909: { name: "Reina-Valera 1909", strong: true, disclaimer: "Texto de dominio público (Reina-Valera 1909)." }
+      LBLA: { name: "La Biblia de las Américas", strong: true, disclaimer: "Copyright © 1986, 1995, 1997 by The Lockman Foundation. Todos los derechos reservados." }
 
   pt:
     name: "Português"
