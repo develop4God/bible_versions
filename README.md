@@ -4,7 +4,7 @@
 <!-- AUTO-GENERATED:BADGES:START -->
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Languages](https://img.shields.io/badge/languages-10-brightgreen.svg)
-![Versions](https://img.shields.io/badge/versions-26-brightgreen.svg)
+![Versions](https://img.shields.io/badge/versions-27-brightgreen.svg)
 <!-- AUTO-GENERATED:BADGES:END -->
 
 Bible versions assets for [Develop4God](https://www.develop4God.com) ministry apps — for God's glory, in service of our mission (Isaiah 55:10-11).
@@ -32,6 +32,7 @@ A machine-readable index of all versions is available in [`index.json`](index.js
 | NVI | Nueva Versión Internacional | `NVI_es.SQLite3.gz` | — |
 | NTV | Nueva Traducción Viviente | `NTV_es.SQLite3.gz` | — |
 | RVR1909 | Reina-Valera 1909 | `RVR1909_es.SQLite3.gz` | ✅ |
+| LBLA | La Biblia de las Américas | `LBLA_es.SQLite3.gz` | ✅ |
 
 ### `pt` — Português
 | ID | Name | File | Strong's |
