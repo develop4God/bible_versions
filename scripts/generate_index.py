@@ -17,6 +17,7 @@ Exit codes:
 ─────────────────────────────────────────────────────────────────────────────
 """
 
+import hashlib
 import json
 import sys
 import os
@@ -85,6 +86,16 @@ def validate(config_languages: dict, disk_files: set[str]) -> bool:
     return len(errors) == 0
 
 
+def file_hash(path: Path) -> str:
+    """SHA256 of file content, truncated to 16 hex chars — enough to detect
+    content changes, short enough to keep index.json small."""
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(65536), b""):
+            h.update(chunk)
+    return h.hexdigest()[:16]
+
+
 def build_index(config: dict) -> dict:
     base_url  = config["index"]["base_url"].rstrip("/")
     languages = config["languages"]
@@ -94,11 +105,13 @@ def build_index(config: dict) -> dict:
         versions_out = {}
         for version_id, version_data in lang_data["versions"].items():
             filename = f"{version_id}_{lang}.SQLite3.gz"
+            file_path = REPO_ROOT / lang / filename
             entry = {
                 "name":   version_data["name"],
                 "strong": version_data["strong"],
                 "file":   filename,
                 "url":    f"{base_url}/{lang}/{filename}",
+                "hash":   file_hash(file_path),
             }
             if "disclaimer" in version_data:
                 entry["disclaimer"] = version_data["disclaimer"]
