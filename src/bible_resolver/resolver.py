@@ -101,15 +101,17 @@ def fetch_text(
 ) -> str | None:
     """Fetch and sanitize a complete verse range, or return ``None``."""
     cursor.execute(
-        "SELECT text FROM verses "
+        "SELECT verse, text FROM verses "
         "WHERE book_number=? AND chapter=? AND verse>=? AND verse<=? "
         "ORDER BY verse",
         (book_number, chapter, v_start, v_end),
     )
     rows = cursor.fetchall()
-    if not rows or any(row[0] is None for row in rows):
+    if len({verse for verse, _ in rows}) != v_end - v_start + 1:
+        return None  # a verse in the range is missing: never return a partial range
+    if any(text is None for _, text in rows):
         return None
-    return clean_verse_text(" ".join(row[0] for row in rows))
+    return clean_verse_text(" ".join(text for _, text in rows))
 
 
 class VerseResolver:

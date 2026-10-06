@@ -112,6 +112,18 @@ class TestResolveErrors:
             assert r.resolve("Genesis 1:1-2")[0] is None
             assert r.resolve("Genesis 1:1")[0] == "Genesis 1:1"
 
+    def test_range_running_past_chapter_end_is_not_found_not_truncated(self, make_db):
+        path = make_db([(10, "Genesis")], [(10, 1, 1, "a"), (10, 1, 2, "b")])
+        with VerseResolver(path) as r:
+            cita, texto, error = r.resolve("Genesis 1:1-3")
+            assert (cita, texto) == (None, None) and "chapter has 2 verses" in error
+            assert r.resolve("Genesis 1:1-2")[1] == "a b"
+
+    def test_gap_inside_range_is_not_found(self, make_db):
+        path = make_db([(10, "Genesis")], [(10, 1, 1, "a"), (10, 1, 3, "c")])
+        with VerseResolver(path) as r:
+            assert r.resolve("Genesis 1:1-3")[0] is None
+
     def test_resolve_many(self, make_db):
         path = make_db([(10, "Genesis")], [(10, 1, 1, "a")])
         with VerseResolver(path) as r:

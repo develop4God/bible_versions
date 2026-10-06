@@ -200,3 +200,9 @@ def test_herv_titus_is_complete():
             assert r.resolve(f"Titus {chapter}:{last + 1}")[2] is not None
         cita, texto, _ = r.resolve("Titus 3:9")
         assert cita == "तीतुस 3:9" and "वंशावली" in texto and texto.endswith("।")
+
+
+def test_range_past_end_of_titus_is_an_error_not_truncated():
+    with _open("hi/HERV_hi.SQLite3.gz") as r:
+        assert r.resolve("Titus 3:15")[2] is None
+        assert r.resolve("Titus 3:15-16")[0] is None
