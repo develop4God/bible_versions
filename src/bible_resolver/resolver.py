@@ -11,16 +11,21 @@ import json
 import os
 import re
 import sqlite3
+import warnings
 from functools import lru_cache
 from pathlib import Path
 from typing import NamedTuple, Self
 
-from .book_name_normalizer import sanitize_book_name
+from .book_name_normalizer import resolve_book_title
 from .books_sot import load_books_sot
 
 _DATA_DIR = Path(__file__).parent / "data"
 _DEVA = str.maketrans("०१२३४५६७८९", "0123456789")
 _VERSIFICATION_SHIFTS_PATH = _DATA_DIR / "versification_shifts.json"
+
+
+class UnmappedBookWarning(UserWarning):
+    """A citation title fell back to the DB's raw title: no rule covers it."""
 
 
 class Resolution(NamedTuple):
@@ -52,9 +57,16 @@ def load_versification_shifts(language: str | None, db_version: str) -> dict[str
 
 
 def _primary_language(code: str | None) -> str | None:
-    """Reduce DB language values such as ``zh Simplified`` / ``pt-BR`` to ``zh`` / ``pt``."""
+    """Reduce language values such as ``zh Simplified`` / ``pt-BR`` to ``zh`` / ``pt``."""
     tokens = re.split(r"[\s_-]+", (code or "").strip().lower())
     return tokens[0] or None
+
+
+def _db_language_code(code: str | None) -> str | None:
+    """Language from a DB's own ``info`` row. The Filipino DBs store ``tl``; the
+    project code is ``fil``, so only this metadata (never a caller) is mapped."""
+    language = _primary_language(code)
+    return "fil" if language == "tl" else language
 
 
 def parse_en_ref(cita: str) -> tuple[str, int, int, int] | None:
@@ -96,15 +108,17 @@ def fetch_text(
 ) -> str | None:
     """Fetch and sanitize a complete verse range, or return ``None``."""
     cursor.execute(
-        "SELECT text FROM verses "
+        "SELECT verse, text FROM verses "
         "WHERE book_number=? AND chapter=? AND verse>=? AND verse<=? "
         "ORDER BY verse",
         (book_number, chapter, v_start, v_end),
     )
     rows = cursor.fetchall()
-    if not rows or any(row[0] is None for row in rows):
+    if len({verse for verse, _ in rows}) != v_end - v_start + 1:
+        return None  # a verse in the range is missing: never return a partial range
+    if any(text is None for _, text in rows):
         return None
-    return clean_verse_text(" ".join(row[0] for row in rows))
+    return clean_verse_text(" ".join(text for _, text in rows))
 
 
 class VerseResolver:
@@ -124,7 +138,12 @@ class VerseResolver:
         sqlite_path: str,
         books_sot_path: str | None = None,
         language: str | None = None,
+        strict: bool = False,
     ) -> None:
+        if _primary_language(language) == "tl":
+            raise ValueError("language 'tl' is not supported: use 'fil' for Filipino")
+        self.strict = strict
+        self._warned: set[int] = set()
         self.books_sot = load_books_sot(books_sot_path)
         db_version = os.path.basename(sqlite_path)
         if db_version.lower().endswith(".gz"):
@@ -133,7 +152,11 @@ class VerseResolver:
         self.conn: sqlite3.Connection | None = self._connect(sqlite_path)
         try:
             self.cursor: sqlite3.Cursor | None = self.conn.cursor()
-            self.language = _primary_language(language or self._db_language())
+            self.language = (
+                _primary_language(language)
+                if language
+                else _db_language_code(self._db_language())
+            )
             self.versification_shifts = load_versification_shifts(
                 self.language, db_version
             )
@@ -187,11 +210,37 @@ class VerseResolver:
             row = cursor.fetchone()
         except sqlite3.OperationalError:
             row = None
-        return (
-            sanitize_book_name(row[0], book_number, self.language)
-            if row and row[0]
-            else fallback
+        if not (row and row[0]):
+            return fallback
+        title, source = resolve_book_title(row[0], book_number, self.language)
+        if source in ("unmapped", "no-config"):
+            self._flag_fallback(book_number, title, source)
+        return title
+
+    def _flag_fallback(self, book_number: int, title: str, source: str) -> None:
+        message = (
+            f"book {book_number} keeps the raw DB title {title!r} "
+            f"(language={self.language!r}, {source})"
         )
+        if self.strict:
+            raise LookupError(message)
+        if book_number not in self._warned:
+            self._warned.add(book_number)
+            warnings.warn(message, UnmappedBookWarning, stacklevel=4)
+
+    def coverage(self) -> dict:
+        """Report how this DB's book titles are produced, for auditing rules."""
+        cursor = self._require_cursor()
+        cursor.execute("SELECT book_number, long_name FROM books")
+        sources: dict[str, list[int]] = {}
+        for number, raw in cursor.fetchall():
+            if raw:
+                source = resolve_book_title(raw, number, self.language)[1]
+                sources.setdefault(source, []).append(number)
+        return {
+            "language": self.language,
+            **{k: sorted(v) for k, v in sorted(sources.items())},
+        }
 
     def _apply_shift(
         self, book_en: str, chapter: int, v_start: int, v_end: int
