@@ -135,6 +135,19 @@ Filipino is `fil`: passing `language="tl"` raises `ValueError` (the two Filipino
 
 Citation titles are never guessed silently: every language has a complete map in `book_name_sanitizers/` (or declares `"passthrough": true`, as `zh` and `ja` do). A book no rule covers emits `UnmappedBookWarning` (or raises with `VerseResolver(..., strict=True)`), and `resolver.coverage()` lists which books are mapped. `tests/golden_citations.json` snapshots all citation titles for every shipped DB; review its diff when you change a rule (`UPDATE_GOLDEN=1 uv run pytest tests/test_coverage.py` regenerates it).
 
+### Getting a database without copying it
+
+Other repos should not keep their own copies of the `.gz` files. Ask for the path instead:
+
+```python
+from bible_resolver import database_path, VerseResolver
+
+with VerseResolver(str(database_path("hi", "HERV"))) as r:
+    ...
+```
+
+`database_path(language, version)` reads the file **in place** from a `bible_versions` checkout (set `BIBLE_VERSIONS_DIR`, or it uses the checkout the package runs from) and checks its hash against `index.json`. With no checkout (CI, another machine) it downloads the file listed in `index.json` from `main`, verifies the hash, and caches it under `~/.cache/bible_resolver/dbs/`; offline it reuses the cache. A bad download raises `DatabaseIntegrityError`; an unknown version raises `DatabaseNotFoundError`.
+
 Run the tests with `uv run pytest` (they cover every shipped DB, including long/irregular book names in HIOV, ARA/ARC/NVI and Chinese).
 
 ## Contributing
