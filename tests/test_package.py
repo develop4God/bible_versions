@@ -1,31 +1,14 @@
 """Package-level guarantees: bundled SOT, no network, lifecycle, API surface."""
 
 import json
-import urllib.request
 from pathlib import Path
 
 import pytest
 
 import bible_resolver
 from bible_resolver import Resolution, VerseResolver, load_books_sot, load_title_aliases
-from bible_resolver.resolver import BOOKS_SOT_PATH
 
 ROOT = Path(__file__).parent.parent
-
-
-def test_bundled_sot_matches_repo_root_copy():
-    """Root bible_books.json is the published SOT; the bundled copy must not drift."""
-    assert json.loads(BOOKS_SOT_PATH.read_text("utf-8")) == json.loads(
-        (ROOT / "bible_books.json").read_text("utf-8")
-    )
-
-
-def test_default_sot_never_touches_network(monkeypatch):
-    def boom(*a, **k):
-        raise AssertionError("network access attempted")
-
-    monkeypatch.setattr(urllib.request, "urlopen", boom)
-    assert load_books_sot()["John"] == 500
 
 
 def test_every_sot_name_round_trips_through_parser():

@@ -16,9 +16,9 @@ from pathlib import Path
 from typing import NamedTuple, Self
 
 from .book_name_normalizer import sanitize_book_name
+from .books_sot import load_books_sot
 
 _DATA_DIR = Path(__file__).parent / "data"
-BOOKS_SOT_PATH = _DATA_DIR / "bible_books.json"
 _DEVA = str.maketrans("०१२३४५६७८९", "0123456789")
 _VERSIFICATION_SHIFTS_PATH = _DATA_DIR / "versification_shifts.json"
 
@@ -49,22 +49,6 @@ def load_versification_shifts(language: str | None, db_version: str) -> dict[str
     if not language:
         return {}
     return _load_shifts_file().get(language.upper(), {}).get(db_version, {})
-
-
-@lru_cache(maxsize=None)
-def _load_books_file(path: str) -> dict[str, int]:
-    with open(path, encoding="utf-8") as source:
-        data = json.load(source)
-    return {name: entry["book_number"] for name, entry in data["books"].items()}
-
-
-def load_books_sot(local_path: str | None = None) -> dict[str, int]:
-    """Load the English-name to canonical-book-number source of truth.
-
-    Reads the copy bundled with the package unless *local_path* is given.
-    Never touches the network, so results depend only on the installed version.
-    """
-    return _load_books_file(str(local_path or BOOKS_SOT_PATH))
 
 
 def _primary_language(code: str | None) -> str | None:

@@ -6,7 +6,7 @@ requires-python = ">=3.12"
 dependencies = []
 
 [dependency-groups]
-dev = ["pytest"]
+dev = ["pytest", "pyyaml"]
 
 [build-system]
 requires = ["uv_build>=0.12,<0.13"]
