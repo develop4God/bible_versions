@@ -1,0 +1,5 @@
+{
+  "_comment": "Each translation keeps its own tradition for book titles, so DB titles pass through (whitespace-normalized).",
+  "passthrough": true,
+  "book_names": {}
+}

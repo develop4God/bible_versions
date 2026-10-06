@@ -11,16 +11,21 @@ import json
 import os
 import re
 import sqlite3
+import warnings
 from functools import lru_cache
 from pathlib import Path
 from typing import NamedTuple, Self
 
-from .book_name_normalizer import sanitize_book_name
+from .book_name_normalizer import resolve_book_title
 from .books_sot import load_books_sot
 
 _DATA_DIR = Path(__file__).parent / "data"
 _DEVA = str.maketrans("०१२३४५६७८९", "0123456789")
 _VERSIFICATION_SHIFTS_PATH = _DATA_DIR / "versification_shifts.json"
+
+
+class UnmappedBookWarning(UserWarning):
+    """A citation title fell back to the DB's raw title: no rule covers it."""
 
 
 class Resolution(NamedTuple):
@@ -124,7 +129,10 @@ class VerseResolver:
         sqlite_path: str,
         books_sot_path: str | None = None,
         language: str | None = None,
+        strict: bool = False,
     ) -> None:
+        self.strict = strict
+        self._warned: set[int] = set()
         self.books_sot = load_books_sot(books_sot_path)
         db_version = os.path.basename(sqlite_path)
         if db_version.lower().endswith(".gz"):
@@ -187,11 +195,37 @@ class VerseResolver:
             row = cursor.fetchone()
         except sqlite3.OperationalError:
             row = None
-        return (
-            sanitize_book_name(row[0], book_number, self.language)
-            if row and row[0]
-            else fallback
+        if not (row and row[0]):
+            return fallback
+        title, source = resolve_book_title(row[0], book_number, self.language)
+        if source in ("unmapped", "no-config"):
+            self._flag_fallback(book_number, title, source)
+        return title
+
+    def _flag_fallback(self, book_number: int, title: str, source: str) -> None:
+        message = (
+            f"book {book_number} keeps the raw DB title {title!r} "
+            f"(language={self.language!r}, {source})"
         )
+        if self.strict:
+            raise LookupError(message)
+        if book_number not in self._warned:
+            self._warned.add(book_number)
+            warnings.warn(message, UnmappedBookWarning, stacklevel=4)
+
+    def coverage(self) -> dict:
+        """Report how this DB's book titles are produced, for auditing rules."""
+        cursor = self._require_cursor()
+        cursor.execute("SELECT book_number, long_name FROM books")
+        sources: dict[str, list[int]] = {}
+        for number, raw in cursor.fetchall():
+            if raw:
+                source = resolve_book_title(raw, number, self.language)[1]
+                sources.setdefault(source, []).append(number)
+        return {
+            "language": self.language,
+            **{k: sorted(v) for k, v in sorted(sources.items())},
+        }
 
     def _apply_shift(
         self, book_en: str, chapter: int, v_start: int, v_end: int

@@ -8,6 +8,8 @@ import pytest
 import bible_resolver
 from bible_resolver import Resolution, VerseResolver, load_books_sot, load_title_aliases
 
+pytestmark = pytest.mark.filterwarnings("ignore::bible_resolver.UnmappedBookWarning")
+
 ROOT = Path(__file__).parent.parent
 
 

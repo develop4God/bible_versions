@@ -17,3 +17,4 @@ module-name = "bible_resolver"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+filterwarnings = ["error::bible_resolver.UnmappedBookWarning"]

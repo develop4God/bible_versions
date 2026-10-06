@@ -7,6 +7,8 @@ import pytest
 from bible_resolver import VerseResolver, clean_verse_text, parse_en_ref
 from bible_resolver.book_name_normalizer import sanitize_book_name
 
+pytestmark = pytest.mark.filterwarnings("ignore::bible_resolver.UnmappedBookWarning")
+
 HIOV_LONG = {
     "Matthew": (470, "मत्ती रचित सुसमाचार", "मत्ती"),
     "Mark": (480, "मरकुस रचित सुसमाचार", "मरकुस"),
