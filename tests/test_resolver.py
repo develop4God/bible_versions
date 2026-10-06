@@ -118,13 +118,53 @@ class TestResolveErrors:
 
 
 class TestGzipInput:
-    def test_gz_db_is_read_and_temp_file_removed(self, make_db, tmp_path):
+    def test_gz_db_is_read_in_memory(self, make_db, tmp_path):
         raw = make_db([(10, "Genesis")], [(10, 1, 1, "a")])
         gz = tmp_path / "t.SQLite3.gz"
         with open(raw, "rb") as s, gzip.open(gz, "wb") as d:
             shutil.copyfileobj(s, d)
-        r = VerseResolver(str(gz))
-        temp = r._temp_path
-        assert r.resolve("Genesis 1:1")[2] is None
-        r.close()
-        assert temp is not None and not __import__("os").path.exists(temp)
+        before = set(tmp_path.iterdir())
+        with VerseResolver(str(gz)) as r:
+            assert r.resolve("Genesis 1:1")[2] is None
+        assert set(tmp_path.iterdir()) == before
+
+    def test_corrupt_gz_raises_without_leaking(self, tmp_path):
+        bad = tmp_path / "bad.SQLite3.gz"
+        bad.write_bytes(b"not gzip")
+        with pytest.raises(OSError):
+            VerseResolver(str(bad))
+
+
+class TestVersificationRanges:
+    def test_range_starting_at_shifted_verse_keeps_length(self, make_db):
+        path = make_db(
+            [(360, "Joel")],
+            [(360, 3, 1, "a"), (360, 3, 2, "b")],
+            language="de",
+            name="LU17_de.SQLite3",
+        )
+        with VerseResolver(path) as r:
+            assert r.resolve("Joel 2:28-29") == ("Joel 3:1-2", "a b", None)
+
+    def test_unlisted_range_is_untouched(self, make_db):
+        path = make_db([(360, "Joel")], [(360, 2, 1, "a")], language="de", name="LU17_de.SQLite3")
+        with VerseResolver(path) as r:
+            assert r.resolve("Joel 2:1")[0] == "Joel 2:1"
+
+
+class TestParseRefNegatives:
+    @pytest.mark.parametrize("bad", ["", "John", "John 3", "John 3:", "3:16", "John 3:16-", "John 3:16 kjv extra words"])
+    def test_rejected(self, bad):
+        assert parse_en_ref(bad) is None
+
+    def test_multiword_and_numbered_books(self):
+        assert parse_en_ref("Song of Solomon 2:1") == ("Song of Solomon", 2, 1, 1)
+        assert parse_en_ref("1 Thessalonians 5:16-18 NIV") == ("1 Thessalonians", 5, 16, 18)
+
+
+class TestLanguageNormalization:
+    @pytest.mark.parametrize("raw", ["zh Simplified", "PT-BR", "hi_IN", " Hi "])
+    def test_primary_subtag_is_used(self, make_db, raw):
+        path = make_db([(490, "लूका रचित सुसमाचार")], [(490, 1, 1, "t")], language=raw)
+        with VerseResolver(path) as r:
+            assert r.language == raw.strip().replace("_", "-").split("-")[0].split()[0].lower()

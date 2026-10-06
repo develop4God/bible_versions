@@ -1,22 +1,5 @@
 import sqlite3
-from pathlib import Path
-
 import pytest
-
-import bible_resolver.resolver as resolver_mod
-
-REPO_ROOT = Path(__file__).parent.parent
-BOOKS_JSON = REPO_ROOT / "bible_books.json"
-
-
-@pytest.fixture(autouse=True)
-def local_books_sot(monkeypatch):
-    """Use the repo's bible_books.json so no test touches the network."""
-    monkeypatch.setattr(resolver_mod, "_books_sot_cache", None)
-    resolver_mod.load_books_sot(str(BOOKS_JSON))
-    yield
-    monkeypatch.setattr(resolver_mod, "_books_sot_cache", None)
-
 
 @pytest.fixture
 def make_db(tmp_path):

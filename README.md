@@ -112,6 +112,8 @@ The `bible_resolver` package (in [`src/bible_resolver/`](src/bible_resolver/)) i
 
 You always call it with the **English** book name, regardless of which language database you're querying. [`bible_books.json`](bible_books.json) is the source of truth mapping EN book names to a `book_number` that's identical across all language DBs (MySword/TheWord standard). The native book name comes from the target DB's own `books` table, then passes through a per-language sanitizer ([`data/book_name_sanitizers/`](src/bible_resolver/data/book_name_sanitizers/)) so citations carry clean names (`यूहन्ना`, not `यूहन्ना रचित सुसमाचार`). The language is read from the DB's `info` table, or passed as `language=`. Known versification differences (e.g. German Joel/Malachi) are remapped via [`versification_shifts.json`](src/bible_resolver/data/versification_shifts.json).
 
+Requires Python 3.12+. `bible_books.json` is bundled in the package (no network access at runtime; a test keeps the bundled copy identical to the root file). The package does **not** ship the databases: pass the path to a `.SQLite3` or `.SQLite3.gz` file you have downloaded. Empty or missing verses return an `error` instead of blank text.
+
 Add it to a project with [uv](https://docs.astral.sh/uv/):
 
 ```bash
@@ -127,7 +129,9 @@ with VerseResolver("hi/HIOV_hi.SQLite3.gz") as r:
     # texto -> verse text from the DB, markup and footnotes stripped
 ```
 
-Run the tests with `uv run pytest`.
+Versification shifts are keyed by language code, then DB filename stem (e.g. `DE` → `LU17_de`), then `"Book Chapter:Verse"` → `"Chapter:Verse"`; a range that starts on a shifted verse keeps its length.
+
+Run the tests with `uv run pytest` (they cover every shipped DB, including long/irregular book names in HIOV, ARA/ARC/NVI and Chinese).
 
 ## Contributing
 

@@ -10,25 +10,31 @@ import gzip
 import json
 import os
 import re
-import shutil
 import sqlite3
-import tempfile
-import urllib.request
-from typing import Self
-
+from functools import lru_cache
 from pathlib import Path
+from typing import NamedTuple, Self
 
 from .book_name_normalizer import sanitize_book_name
 
-
-BOOKS_SOT_URL = (
-    "https://raw.githubusercontent.com/develop4god/bible_versions"
-    "/refs/heads/main/bible_books.json"
-)
+_DATA_DIR = Path(__file__).parent / "data"
+BOOKS_SOT_PATH = _DATA_DIR / "bible_books.json"
 _DEVA = str.maketrans("०१२३४५६७८९", "0123456789")
-_books_sot_cache: dict[str, int] | None = None
-_VERSIFICATION_SHIFTS_PATH = Path(__file__).parent / "data" / "versification_shifts.json"
-_versification_shifts_cache: dict | None = None
+_VERSIFICATION_SHIFTS_PATH = _DATA_DIR / "versification_shifts.json"
+
+
+class Resolution(NamedTuple):
+    """Outcome of resolving one reference; unpacks as ``(cita, texto, error)``."""
+
+    cita: str | None
+    texto: str | None
+    error: str | None
+
+
+@lru_cache(maxsize=None)
+def _load_shifts_file() -> dict:
+    with open(_VERSIFICATION_SHIFTS_PATH, encoding="utf-8") as source:
+        return json.load(source)
 
 
 def load_versification_shifts(language: str | None, db_version: str) -> dict[str, str]:
@@ -40,39 +46,37 @@ def load_versification_shifts(language: str | None, db_version: str) -> dict[str
     source references seeds are built from (e.g. German Joel/Malachi's
     different chapter splits). Missing language/version is a safe no-op.
     """
-    global _versification_shifts_cache
     if not language:
         return {}
-    if _versification_shifts_cache is None:
-        if _VERSIFICATION_SHIFTS_PATH.exists():
-            with open(_VERSIFICATION_SHIFTS_PATH, encoding="utf-8") as source:
-                _versification_shifts_cache = json.load(source)
-        else:
-            _versification_shifts_cache = {}
-    return _versification_shifts_cache.get(language.upper(), {}).get(db_version, {})
+    return _load_shifts_file().get(language.upper(), {}).get(db_version, {})
+
+
+@lru_cache(maxsize=None)
+def _load_books_file(path: str) -> dict[str, int]:
+    with open(path, encoding="utf-8") as source:
+        data = json.load(source)
+    return {name: entry["book_number"] for name, entry in data["books"].items()}
 
 
 def load_books_sot(local_path: str | None = None) -> dict[str, int]:
-    """Load the English-name to canonical-book-number source of truth."""
-    global _books_sot_cache
-    if _books_sot_cache is not None:
-        return _books_sot_cache
-    if local_path and os.path.exists(local_path):
-        with open(local_path, encoding="utf-8") as source:
-            data = json.load(source)
-    else:
-        with urllib.request.urlopen(BOOKS_SOT_URL) as response:
-            data = json.loads(response.read())
-    _books_sot_cache = {
-        name: entry["book_number"] for name, entry in data["books"].items()
-    }
-    return _books_sot_cache
+    """Load the English-name to canonical-book-number source of truth.
+
+    Reads the copy bundled with the package unless *local_path* is given.
+    Never touches the network, so results depend only on the installed version.
+    """
+    return _load_books_file(str(local_path or BOOKS_SOT_PATH))
+
+
+def _primary_language(code: str | None) -> str | None:
+    """Reduce DB language values such as ``zh Simplified`` / ``pt-BR`` to ``zh`` / ``pt``."""
+    tokens = re.split(r"[\s_-]+", (code or "").strip().lower())
+    return tokens[0] or None
 
 
 def parse_en_ref(cita: str) -> tuple[str, int, int, int] | None:
     """Parse ``John 3:16`` and ``1 Corinthians 13:4-7`` references."""
     cita = cita.strip().translate(_DEVA)
-    cita = re.sub(r"\s+[A-Z0-9]{2,6}$", "", cita).strip()
+    cita = re.sub(r"\s+[A-Z][A-Z0-9]{1,5}$", "", cita).strip()
     match = re.match(
         r"^((?:\d\s+)?[A-Za-z]+(?:\s+[A-Za-z]+)*)\s+(\d+):(\d+)(?:-(\d+))?$",
         cita,
@@ -125,7 +129,10 @@ class VerseResolver:
     ``language`` selects a JSON configuration in ``book_name_sanitizers``.
     When omitted, the language is read from the database's own info table
     (language row), so titles are sanitized by content, not by file name.
+    Values like ``zh Simplified`` use their primary subtag (``zh``).
     A database with neither returns its titles unchanged.
+
+    ``.gz`` databases are decompressed into memory; nothing is written to disk.
     """
 
     def __init__(
@@ -139,28 +146,40 @@ class VerseResolver:
         if db_version.lower().endswith(".gz"):
             db_version = db_version[: -len(".gz")]
         db_version = os.path.splitext(db_version)[0]
-        self._temp_path: str | None = None
-        if sqlite_path.lower().endswith(".gz"):
-            fd, self._temp_path = tempfile.mkstemp(suffix=".SQLite3")
-            os.close(fd)
-            with gzip.open(sqlite_path, "rb") as source, open(
-                self._temp_path, "wb"
-            ) as destination:
-                shutil.copyfileobj(source, destination)
-            sqlite_path = self._temp_path
-        self.conn: sqlite3.Connection | None = sqlite3.connect(sqlite_path)
-        self.cursor: sqlite3.Cursor | None = self.conn.cursor()
-        self.language = (language or self._db_language() or "").lower() or None
-        self.versification_shifts = load_versification_shifts(self.language, db_version)
+        self.conn: sqlite3.Connection | None = self._connect(sqlite_path)
+        try:
+            self.cursor: sqlite3.Cursor | None = self.conn.cursor()
+            self.language = _primary_language(language or self._db_language())
+            self.versification_shifts = load_versification_shifts(
+                self.language, db_version
+            )
+        except Exception:
+            self.close()
+            raise
+
+    @staticmethod
+    def _connect(sqlite_path: str) -> sqlite3.Connection:
+        if not sqlite_path.lower().endswith(".gz"):
+            return sqlite3.connect(sqlite_path)
+        with gzip.open(sqlite_path, "rb") as source:
+            data = source.read()
+        conn = sqlite3.connect(":memory:")
+        conn.deserialize(data)
+        return conn
+
+    def _require_cursor(self) -> sqlite3.Cursor:
+        if self.cursor is None:
+            raise RuntimeError("VerseResolver is closed")
+        return self.cursor
 
     def _db_language(self) -> str | None:
         """Read the ``language`` row of the DB's ``info`` table, if present."""
-        assert self.cursor is not None
+        cursor = self._require_cursor()
         try:
-            self.cursor.execute("SELECT value FROM info WHERE name = 'language'")
+            cursor.execute("SELECT value FROM info WHERE name = 'language'")
         except sqlite3.OperationalError:
             return None
-        row = self.cursor.fetchone()
+        row = cursor.fetchone()
         return row[0] if row and row[0] else None
 
     def __enter__(self) -> Self:
@@ -174,17 +193,14 @@ class VerseResolver:
             self.conn.close()
             self.conn = None
             self.cursor = None
-        if self._temp_path:
-            os.unlink(self._temp_path)
-            self._temp_path = None
 
     def _native_book_name(self, book_number: int, fallback: str) -> str:
-        assert self.cursor is not None
+        cursor = self._require_cursor()
         try:
-            self.cursor.execute(
+            cursor.execute(
                 "SELECT long_name FROM books WHERE book_number = ?", (book_number,)
             )
-            row = self.cursor.fetchone()
+            row = cursor.fetchone()
         except sqlite3.OperationalError:
             row = None
         return (
@@ -193,40 +209,63 @@ class VerseResolver:
             else fallback
         )
 
-    def resolve(self, cita_en: str) -> tuple[str | None, str | None, str | None]:
+    def _apply_shift(
+        self, book_en: str, chapter: int, v_start: int, v_end: int
+    ) -> tuple[int, int, int]:
+        """Remap a range whose start verse is a known versification shift.
+
+        The end verse follows its own shift entry when it has one; otherwise the
+        range length is preserved (``Joel 2:28-29`` -> ``3:1-2``).
+        """
+        shift = self.versification_shifts.get(f"{book_en} {chapter}:{v_start}")
+        if not shift:
+            return chapter, v_start, v_end
+        new_chapter, _, verse = shift.partition(":")
+        new_start = int(verse)
+        end_shift = self.versification_shifts.get(f"{book_en} {chapter}:{v_end}")
+        if end_shift and end_shift.partition(":")[0] == new_chapter:
+            new_end = int(end_shift.partition(":")[2])
+        else:
+            new_end = new_start + (v_end - v_start)
+        return int(new_chapter), new_start, new_end
+
+    def resolve(self, cita_en: str) -> Resolution:
         parsed = parse_en_ref(cita_en)
         if parsed is None:
-            return None, None, f"could not parse reference: '{cita_en}'"
+            return Resolution(None, None, f"could not parse reference: '{cita_en}'")
         book_en, chapter, v_start, v_end = parsed
         book_number = self.books_sot.get(book_en)
         if book_number is None:
-            return None, None, f"unknown book: '{book_en}' — not in bible_books.json SOT"
+            return Resolution(
+                None, None, f"unknown book: '{book_en}' — not in bible_books.json SOT"
+            )
 
-        if v_start == v_end:
-            shift = self.versification_shifts.get(f"{book_en} {chapter}:{v_start}")
-            if shift:
-                chapter, _, verse = shift.partition(":")
-                chapter, v_start = int(chapter), int(verse)
-                v_end = v_start
+        chapter, v_start, v_end = self._apply_shift(book_en, chapter, v_start, v_end)
 
-        assert self.cursor is not None
+        cursor = self._require_cursor()
         local_name = self._native_book_name(book_number, book_en)
-        texto = fetch_text(self.cursor, book_number, chapter, v_start, v_end)
+        texto = fetch_text(cursor, book_number, chapter, v_start, v_end)
         range_suffix = f"{v_start}-{v_end}" if v_start != v_end else str(v_start)
         if texto is None:
-            self.cursor.execute(
+            cursor.execute(
                 "SELECT MAX(verse) FROM verses WHERE book_number=? AND chapter=?",
                 (book_number, chapter),
             )
-            row = self.cursor.fetchone()
+            row = cursor.fetchone()
             max_verse = row[0] if row and row[0] else "unknown"
-            return (
+            return Resolution(
                 None,
                 None,
                 f"verse not found: '{cita_en}' → {local_name} {chapter}:{range_suffix} "
                 f"(chapter has {max_verse} verses)",
             )
-        return f"{local_name} {chapter}:{range_suffix}", texto, None
+        if not texto:
+            return Resolution(
+                None,
+                None,
+                f"verse text is empty: '{cita_en}' → {local_name} {chapter}:{range_suffix}",
+            )
+        return Resolution(f"{local_name} {chapter}:{range_suffix}", texto, None)
 
     def resolve_many(self, refs: list[str]) -> list[dict[str, str | None]]:
         return [
@@ -236,6 +275,6 @@ class VerseResolver:
         ]
 
     def verse_count(self) -> int:
-        assert self.cursor is not None
-        self.cursor.execute("SELECT COUNT(*) FROM verses")
-        return self.cursor.fetchone()[0]
+        cursor = self._require_cursor()
+        cursor.execute("SELECT COUNT(*) FROM verses")
+        return cursor.fetchone()[0]
