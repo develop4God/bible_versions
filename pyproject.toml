@@ -1,6 +1,6 @@
 [project]
 name = "bible-resolver"
-version = "0.1.0"
+version = "0.2.0"
 description = "Shared English-reference to native-language Bible verse resolver for the bible_versions SQLite databases."
 requires-python = ">=3.12"
 dependencies = []
