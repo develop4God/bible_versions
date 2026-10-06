@@ -25,7 +25,7 @@ LONG_FORM_MARKERS = {
 
 
 # Data gaps in the shipped DBs (not resolver bugs); tests pin them so a fix is noticed.
-KNOWN_EMPTY_BOOKS = {"HERV_hi": {"Titus"}}
+KNOWN_EMPTY_BOOKS: dict[str, set[str]] = {}
 
 
 def _id(path):
@@ -189,3 +189,14 @@ def test_empty_verse_in_db_is_an_error_not_blank_text():
     with _open("hi/HERV_hi.SQLite3.gz") as r:
         cita, texto, error = r.resolve("1 Chronicles 1:1")
         assert cita is None and texto is None and "empty" in error
+
+
+def test_herv_titus_is_complete():
+    """Titus was missing from HERV_hi; restored from Hindi ERV (46 verses)."""
+    with _open("hi/HERV_hi.SQLite3.gz") as r:
+        assert r.verse_count() == 31102
+        for chapter, last in ((1, 16), (2, 15), (3, 15)):
+            assert r.resolve(f"Titus {chapter}:{last}")[2] is None
+            assert r.resolve(f"Titus {chapter}:{last + 1}")[2] is not None
+        cita, texto, _ = r.resolve("Titus 3:9")
+        assert cita == "तीतुस 3:9" and "वंशावली" in texto and texto.endswith("।")
