@@ -108,20 +108,34 @@ Or use gzip-compatible decompression libraries in your application.
 
 ## Verse Resolver
 
-[`scripts/verse_resolver.py`](scripts/verse_resolver.py) resolves English Bible references (e.g. `"John 3:16"`, `"1 Corinthians 13:4-7"`) to native-language citations and verse text from any of the SQLite databases in this repo.
+The `bible_resolver` package (in [`src/bible_resolver/`](src/bible_resolver/)) is the **single source of truth** for resolving English Bible references (e.g. `"John 3:16"`, `"1 Corinthians 13:4-7"`) to native-language citations and verse text from any of the SQLite databases in this repo. Do not copy it into other projects — depend on it.
 
-You always call it with the **English** book name, regardless of which language database you're querying. [`bible_books.json`](bible_books.json) is the source of truth mapping EN book names to a `book_number` that's identical across all language DBs (MySword/TheWord standard). The resolver uses that number to look up the native book name directly from the target DB's own `books` table — so there's no manual per-language name mapping to maintain, and no need to translate book names yourself for each Bible version.
+You always call it with the **English** book name, regardless of which language database you're querying. [`bible_books.json`](bible_books.json) is the source of truth mapping EN book names to a `book_number` that's identical across all language DBs (MySword/TheWord standard). The native book name comes from the target DB's own `books` table, then passes through a per-language sanitizer ([`data/book_name_sanitizers/`](src/bible_resolver/data/book_name_sanitizers/)) so citations carry clean names (`यूहन्ना`, not `यूहन्ना रचित सुसमाचार`). The language is read from the DB's `info` table, or passed as `language=`. Known versification differences (e.g. German Joel/Malachi) are remapped via [`versification_shifts.json`](src/bible_resolver/data/versification_shifts.json).
 
-```python
-from verse_resolver import VerseResolver
+Requires Python 3.12+. `bible_books.json` has a single copy: the repo root, on `main`. In a checkout it is read locally; when installed as a dependency it is downloaded from `main` (10 s timeout, cached under `~/.cache/bible_resolver/`, used offline once cached). Either way its hash is validated against `meta.books_sot.hash` in [`index.json`](index.json); a bad download raises `BooksSotError`. After editing it, run `python3 scripts/generate_index.py` (CI does this on push to `main`). The package does **not** ship the databases: pass the path to a `.SQLite3` or `.SQLite3.gz` file you have downloaded. Empty or missing verses return an `error` instead of blank text.
 
-with VerseResolver("en/KJV_en.SQLite3.gz") as r:
-    cita, texto, error = r.resolve("John 3:16")
-    # cita  -> "John 3:16"
-    # texto -> verse text from the DB
+Add it to a project with [uv](https://docs.astral.sh/uv/):
+
+```bash
+uv add "bible-resolver @ git+https://github.com/develop4God/bible_versions"
 ```
 
-It's a standalone, reusable module — copy it into any project that needs to resolve references against these databases.
+```python
+from bible_resolver import VerseResolver
+
+with VerseResolver("hi/HIOV_hi.SQLite3.gz") as r:
+    cita, texto, error = r.resolve("John 3:16")
+    # cita  -> "यूहन्ना 3:16"
+    # texto -> verse text from the DB, markup and footnotes stripped
+```
+
+Versification shifts are keyed by language code, then DB filename stem (e.g. `DE` → `LU17_de`), then `"Book Chapter:Verse"` → `"Chapter:Verse"`; a range that starts on a shifted verse keeps its length.
+
+Filipino is `fil`: passing `language="tl"` raises `ValueError` (the two Filipino DBs store `tl` in their own info table, which the resolver maps to `fil`).
+
+Citation titles are never guessed silently: every language has a complete map in `book_name_sanitizers/` (or declares `"passthrough": true`, as `zh` and `ja` do). A book no rule covers emits `UnmappedBookWarning` (or raises with `VerseResolver(..., strict=True)`), and `resolver.coverage()` lists which books are mapped. `tests/golden_citations.json` snapshots all citation titles for every shipped DB; review its diff when you change a rule (`UPDATE_GOLDEN=1 uv run pytest tests/test_coverage.py` regenerates it).
+
+Run the tests with `uv run pytest` (they cover every shipped DB, including long/irregular book names in HIOV, ARA/ARC/NVI and Chinese).
 
 ## Contributing
 

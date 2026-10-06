@@ -1,0 +1,20 @@
+[project]
+name = "bible-resolver"
+version = "0.2.0"
+description = "Shared English-reference to native-language Bible verse resolver for the bible_versions SQLite databases."
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+dev = ["pytest", "pyyaml"]
+
+[build-system]
+requires = ["uv_build>=0.12,<0.13"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "bible_resolver"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["error::bible_resolver.UnmappedBookWarning"]

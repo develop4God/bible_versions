@@ -1,0 +1,13 @@
+{
+  "_comment": "Known chapter/verse addresses where a Bible DB's versification differs from the English source references seeds are built from. Nested by language code, then Bible version (DB filename stem, e.g. 'LU17_de' for Bibles/DE/LU17_de.SQLite3). Keys are 'Book Chapter:Verse' as parsed from the English source seed; values are the corrected 'Chapter:Verse' in that DB.",
+  "DE": {
+    "SCH2000_de": {
+      "Joel 2:28": "3:1",
+      "Malachi 4:2": "3:20"
+    },
+    "LU17_de": {
+      "Joel 2:28": "3:1",
+      "Malachi 4:2": "3:20"
+    }
+  }
+}
