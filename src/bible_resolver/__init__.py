@@ -6,6 +6,7 @@ from .book_name_normalizer import (
     sanitize_book_name,
 )
 from .books_sot import BooksSotError, load_books_sot
+from .databases import DatabaseIntegrityError, DatabaseNotFoundError, database_path
 from .resolver import (
     Resolution,
     UnmappedBookWarning,
@@ -18,10 +19,13 @@ from .resolver import (
 
 __all__ = [
     "BooksSotError",
+    "DatabaseIntegrityError",
+    "DatabaseNotFoundError",
     "Resolution",
     "UnmappedBookWarning",
     "VerseResolver",
     "clean_verse_text",
+    "database_path",
     "fetch_text",
     "load_books_sot",
     "load_title_aliases",
