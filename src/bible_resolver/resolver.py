@@ -56,13 +56,17 @@ def load_versification_shifts(language: str | None, db_version: str) -> dict[str
     return _load_shifts_file().get(language.upper(), {}).get(db_version, {})
 
 
-_LANGUAGE_ALIASES = {"tl": "fil"}  # Filipino DBs report ``tl``; configs and folders use ``fil``
-
-
 def _primary_language(code: str | None) -> str | None:
-    """Reduce DB language values such as ``zh Simplified`` / ``pt-BR`` to ``zh`` / ``pt``."""
+    """Reduce language values such as ``zh Simplified`` / ``pt-BR`` to ``zh`` / ``pt``."""
     tokens = re.split(r"[\s_-]+", (code or "").strip().lower())
-    return _LANGUAGE_ALIASES.get(tokens[0], tokens[0]) or None
+    return tokens[0] or None
+
+
+def _db_language_code(code: str | None) -> str | None:
+    """Language from a DB's own ``info`` row. The Filipino DBs store ``tl``; the
+    project code is ``fil``, so only this metadata (never a caller) is mapped."""
+    language = _primary_language(code)
+    return "fil" if language == "tl" else language
 
 
 def parse_en_ref(cita: str) -> tuple[str, int, int, int] | None:
@@ -136,6 +140,8 @@ class VerseResolver:
         language: str | None = None,
         strict: bool = False,
     ) -> None:
+        if _primary_language(language) == "tl":
+            raise ValueError("language 'tl' is not supported: use 'fil' for Filipino")
         self.strict = strict
         self._warned: set[int] = set()
         self.books_sot = load_books_sot(books_sot_path)
@@ -146,7 +152,11 @@ class VerseResolver:
         self.conn: sqlite3.Connection | None = self._connect(sqlite_path)
         try:
             self.cursor: sqlite3.Cursor | None = self.conn.cursor()
-            self.language = _primary_language(language or self._db_language())
+            self.language = (
+                _primary_language(language)
+                if language
+                else _db_language_code(self._db_language())
+            )
             self.versification_shifts = load_versification_shifts(
                 self.language, db_version
             )

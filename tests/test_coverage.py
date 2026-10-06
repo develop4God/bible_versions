@@ -107,8 +107,21 @@ def test_keep_db_title_keeps_each_editions_own_spelling():
     assert resolve_book_title("Aux Romains", 520, "fr") == ("Romains", "mapped")
 
 
-@pytest.mark.parametrize("raw", ["tl", "fil", "TL"])
-def test_filipino_codes_share_one_config(make_db, raw):
-    path = make_db([(10, "Genesis")], [(10, 1, 1, "x")], language=raw)
+def test_filipino_db_metadata_tl_resolves_to_fil_config(make_db):
+    """ASND/MBB05 store language 'tl' in their info table; that metadata maps to 'fil'."""
+    path = make_db([(10, "Genesis")], [(10, 1, 1, "x")], language="tl")
     with VerseResolver(path, strict=True) as r:
+        assert r.language == "fil" and r.coverage()["mapped"] == [10]
+
+
+@pytest.mark.parametrize("explicit", ["tl", "TL", "tl-PH"])
+def test_explicit_tl_is_a_hard_error(make_db, explicit):
+    path = make_db([(10, "Genesis")], [(10, 1, 1, "x")], language="tl")
+    with pytest.raises(ValueError, match="use 'fil'"):
+        VerseResolver(path, language=explicit)
+
+
+def test_explicit_fil_works(make_db):
+    path = make_db([(10, "Genesis")], [(10, 1, 1, "x")], language="tl")
+    with VerseResolver(path, language="fil", strict=True) as r:
         assert r.language == "fil" and r.coverage()["mapped"] == [10]

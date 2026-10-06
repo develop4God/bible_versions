@@ -131,6 +131,8 @@ with VerseResolver("hi/HIOV_hi.SQLite3.gz") as r:
 
 Versification shifts are keyed by language code, then DB filename stem (e.g. `DE` → `LU17_de`), then `"Book Chapter:Verse"` → `"Chapter:Verse"`; a range that starts on a shifted verse keeps its length.
 
+Filipino is `fil`: passing `language="tl"` raises `ValueError` (the two Filipino DBs store `tl` in their own info table, which the resolver maps to `fil`).
+
 Citation titles are never guessed silently: every language has a complete map in `book_name_sanitizers/` (or declares `"passthrough": true`, as `zh` and `ja` do). A book no rule covers emits `UnmappedBookWarning` (or raises with `VerseResolver(..., strict=True)`), and `resolver.coverage()` lists which books are mapped. `tests/golden_citations.json` snapshots all citation titles for every shipped DB; review its diff when you change a rule (`UPDATE_GOLDEN=1 uv run pytest tests/test_coverage.py` regenerates it).
 
 Run the tests with `uv run pytest` (they cover every shipped DB, including long/irregular book names in HIOV, ARA/ARC/NVI and Chinese).
