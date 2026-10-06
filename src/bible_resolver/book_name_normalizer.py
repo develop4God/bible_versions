@@ -2,7 +2,9 @@
 
 Each language has a JSON file in ``book_name_sanitizers/``.  A configuration
 maps canonical MyBible book numbers to the display title used in seeds (or sets
-``"passthrough": true`` when each DB's own titles should be kept), and may
+``"passthrough": true`` when each DB's own titles should be kept; ``keep_db_title``
+lists book numbers whose spelling legitimately differs per edition, e.g. French
+"Éphésiens"/"Ephésiens", so each DB keeps its own), and may
 optionally declare ``aliases`` for title-level variants that no DB column
 carries.  The resolver supplies the language and book number; this module has no
 SQLite or reference-parsing responsibilities.
@@ -74,6 +76,8 @@ def resolve_book_title(
         mapped = _load_language(language).get(str(book_number))
         if mapped:
             return mapped, "mapped"
+        if book_number in _load_config(language).get("keep_db_title", ()):
+            return normalize_title(raw_name), "passthrough"
         if is_passthrough(language):
             return normalize_title(raw_name), "passthrough"
         if _load_config(language):

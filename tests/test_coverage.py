@@ -89,10 +89,26 @@ def test_passthrough_keeps_db_title_but_normalizes():
     assert resolve_book_title("マタイの福音書", 470, "ja") == ("マタイの福音書", "passthrough")
 
 
-@pytest.mark.parametrize("lang", ["ar", "de", "en", "es", "fr", "hi", "pt", "tl"])
+@pytest.mark.parametrize("lang", ["ar", "de", "en", "es", "fr", "fil", "hi", "pt"])
 def test_language_maps_are_complete_and_unique(lang):
     names = json.loads((ROOT / f"src/bible_resolver/data/book_name_sanitizers/{lang}.json").read_text("utf-8"))["book_names"]
-    assert {int(k) for k in names} >= set(CANON) - {10000}
+    keep = set(json.loads((ROOT / f"src/bible_resolver/data/book_name_sanitizers/{lang}.json").read_text("utf-8")).get("keep_db_title", []))
+    assert not keep & {int(k) for k in names}, "a book is both mapped and keep_db_title"
+    assert {int(k) for k in names} | keep >= set(CANON) - {10000}
     canon_names = [names[str(b)] for b in CANON if str(b) in names]
     assert all(n == normalize_title(n) and n for n in canon_names)
     assert len(set(canon_names)) == len(canon_names), "duplicate citation titles"
+
+
+def test_keep_db_title_keeps_each_editions_own_spelling():
+    """Editions spell some books differently (Éphésiens/Ephésiens); '=' keeps each DB's own."""
+    assert resolve_book_title("Éphésiens ", 560, "fr") == ("Éphésiens", "passthrough")
+    assert resolve_book_title("Ephésiens", 560, "fr") == ("Ephésiens", "passthrough")
+    assert resolve_book_title("Aux Romains", 520, "fr") == ("Romains", "mapped")
+
+
+@pytest.mark.parametrize("raw", ["tl", "fil", "TL"])
+def test_filipino_codes_share_one_config(make_db, raw):
+    path = make_db([(10, "Genesis")], [(10, 1, 1, "x")], language=raw)
+    with VerseResolver(path, strict=True) as r:
+        assert r.language == "fil" and r.coverage()["mapped"] == [10]

@@ -56,10 +56,13 @@ def load_versification_shifts(language: str | None, db_version: str) -> dict[str
     return _load_shifts_file().get(language.upper(), {}).get(db_version, {})
 
 
+_LANGUAGE_ALIASES = {"tl": "fil"}  # Filipino DBs report ``tl``; configs and folders use ``fil``
+
+
 def _primary_language(code: str | None) -> str | None:
     """Reduce DB language values such as ``zh Simplified`` / ``pt-BR`` to ``zh`` / ``pt``."""
     tokens = re.split(r"[\s_-]+", (code or "").strip().lower())
-    return tokens[0] or None
+    return _LANGUAGE_ALIASES.get(tokens[0], tokens[0]) or None
 
 
 def parse_en_ref(cita: str) -> tuple[str, int, int, int] | None:

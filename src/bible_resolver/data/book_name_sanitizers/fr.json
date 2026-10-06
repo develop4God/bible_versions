@@ -21,11 +21,9 @@
     "230": "Psaumes",
     "240": "Proverbes",
     "250": "Ecclésiaste",
-    "260": "Cantique des cantiques",
-    "290": "Esaïe",
+    "260": "Cantique",
     "300": "Jérémie",
     "310": "Lamentations",
-    "330": "Ezéchiel",
     "340": "Daniel",
     "350": "Osée",
     "360": "Joël",
@@ -33,8 +31,6 @@
     "380": "Abdias",
     "390": "Jonas",
     "400": "Michée",
-    "410": "Nahum",
-    "420": "Habacuc",
     "430": "Sophonie",
     "440": "Aggée",
     "450": "Zacharie",
@@ -48,7 +44,6 @@
     "530": "1 Corinthiens",
     "540": "2 Corinthiens",
     "550": "Galates",
-    "560": "Ephésiens",
     "570": "Philippiens",
     "580": "Colossiens",
     "590": "1 Thessaloniciens",
@@ -66,5 +61,12 @@
     "710": "3 Jean",
     "720": "Jude",
     "730": "Apocalypse"
-  }
+  },
+  "keep_db_title": [
+    290,
+    330,
+    410,
+    420,
+    560
+  ]
 }

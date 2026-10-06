@@ -33,10 +33,8 @@
     "380": "Abdías",
     "390": "Jonás",
     "400": "Miqueas",
-    "410": "Nahúm",
     "420": "Habacuc",
     "430": "Sofonías",
-    "440": "Ageo",
     "450": "Zacarías",
     "460": "Malaquías",
     "470": "Mateo",
@@ -66,5 +64,9 @@
     "710": "3 Juan",
     "720": "Judas",
     "730": "Apocalipsis"
-  }
+  },
+  "keep_db_title": [
+    410,
+    440
+  ]
 }
