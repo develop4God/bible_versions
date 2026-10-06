@@ -13,6 +13,7 @@ on:
       - main
     paths:
       - "**/*.SQLite3.gz"
+      - "bible_books.json"
       - ".github/bible_versions_config.yml"
       - "scripts/generate_index.py"
       - "scripts/generate_readme.py"
