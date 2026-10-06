@@ -1,0 +1,19 @@
+{
+  "book_names": {
+    "10": "1. Mose", "20": "2. Mose", "30": "3. Mose", "40": "4. Mose", "50": "5. Mose",
+    "60": "Josua", "70": "Richter", "80": "Rut", "90": "1. Samuel", "100": "2. Samuel",
+    "110": "1. Könige", "120": "2. Könige", "130": "1. Chronik", "140": "2. Chronik", "150": "Esra",
+    "160": "Nehemia", "170": "Tobias", "180": "Judit", "190": "Ester", "192": "Stücke zu Ester",
+    "220": "Hiob", "230": "Psalm", "240": "Sprüche", "250": "Prediger", "260": "Hoheslied",
+    "270": "Weisheit", "280": "Sirach", "290": "Jesaja", "300": "Jeremia", "310": "Klagelieder",
+    "320": "Baruch", "330": "Hesekiel", "340": "Daniel", "341": "Stücke zu Daniel", "350": "Hosea",
+    "360": "Joel", "370": "Amos", "380": "Obadja", "390": "Jona", "400": "Micha", "410": "Nahum",
+    "420": "Habakuk", "430": "Zefanja", "440": "Haggai", "450": "Sacharja", "460": "Maleachi",
+    "462": "1. Makkabäer", "464": "2. Makkabäer", "470": "Matthäus", "480": "Markus", "490": "Lukas",
+    "500": "Johannes", "510": "Apostelgeschichte", "520": "Römer", "530": "1. Korinther", "540": "2. Korinther",
+    "550": "Galater", "560": "Epheser", "570": "Philipper", "580": "Kolosser", "590": "1. Thessalonicher",
+    "600": "2. Thessalonicher", "610": "1. Timotheus", "620": "2. Timotheus", "630": "Titus", "640": "Philemon",
+    "650": "Hebräer", "660": "Jakobus", "670": "1. Petrus", "680": "2. Petrus", "690": "1. Johannes",
+    "700": "2. Johannes", "710": "3. Johannes", "720": "Judas", "730": "Offenbarung", "790": "Gebet Manasses"
+  }
+}

@@ -108,20 +108,26 @@ Or use gzip-compatible decompression libraries in your application.
 
 ## Verse Resolver
 
-[`scripts/verse_resolver.py`](scripts/verse_resolver.py) resolves English Bible references (e.g. `"John 3:16"`, `"1 Corinthians 13:4-7"`) to native-language citations and verse text from any of the SQLite databases in this repo.
+The `bible_resolver` package (in [`src/bible_resolver/`](src/bible_resolver/)) is the **single source of truth** for resolving English Bible references (e.g. `"John 3:16"`, `"1 Corinthians 13:4-7"`) to native-language citations and verse text from any of the SQLite databases in this repo. Do not copy it into other projects — depend on it.
 
-You always call it with the **English** book name, regardless of which language database you're querying. [`bible_books.json`](bible_books.json) is the source of truth mapping EN book names to a `book_number` that's identical across all language DBs (MySword/TheWord standard). The resolver uses that number to look up the native book name directly from the target DB's own `books` table — so there's no manual per-language name mapping to maintain, and no need to translate book names yourself for each Bible version.
+You always call it with the **English** book name, regardless of which language database you're querying. [`bible_books.json`](bible_books.json) is the source of truth mapping EN book names to a `book_number` that's identical across all language DBs (MySword/TheWord standard). The native book name comes from the target DB's own `books` table, then passes through a per-language sanitizer ([`data/book_name_sanitizers/`](src/bible_resolver/data/book_name_sanitizers/)) so citations carry clean names (`यूहन्ना`, not `यूहन्ना रचित सुसमाचार`). The language is read from the DB's `info` table, or passed as `language=`. Known versification differences (e.g. German Joel/Malachi) are remapped via [`versification_shifts.json`](src/bible_resolver/data/versification_shifts.json).
 
-```python
-from verse_resolver import VerseResolver
+Add it to a project with [uv](https://docs.astral.sh/uv/):
 
-with VerseResolver("en/KJV_en.SQLite3.gz") as r:
-    cita, texto, error = r.resolve("John 3:16")
-    # cita  -> "John 3:16"
-    # texto -> verse text from the DB
+```bash
+uv add "bible-resolver @ git+https://github.com/develop4God/bible_versions"
 ```
 
-It's a standalone, reusable module — copy it into any project that needs to resolve references against these databases.
+```python
+from bible_resolver import VerseResolver
+
+with VerseResolver("hi/HIOV_hi.SQLite3.gz") as r:
+    cita, texto, error = r.resolve("John 3:16")
+    # cita  -> "यूहन्ना 3:16"
+    # texto -> verse text from the DB, markup and footnotes stripped
+```
+
+Run the tests with `uv run pytest`.
 
 ## Contributing
 
