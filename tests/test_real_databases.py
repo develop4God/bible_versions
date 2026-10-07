@@ -185,10 +185,34 @@ class TestEveryDatabase:
 
 
 def test_empty_verse_in_db_is_an_error_not_blank_text():
-    """HERV_hi ships 1 Chronicles 1:1 with an empty text cell."""
+    """1 Thessalonians 1:10 is a member of the merged block 1:9-10, so its own row is empty."""
     with _open("hi/HERV_hi.SQLite3.gz") as r:
-        cita, texto, error = r.resolve("1 Chronicles 1:1")
+        cita, texto, error = r.resolve("1 Thessalonians 1:10")
         assert cita is None and texto is None and "empty" in error
+
+
+def test_herv_missing_verses_restored_from_original_erv():
+    """569 verses were empty in HERV_hi although the original ERV has their text (hin2010)."""
+    with _open("hi/HERV_hi.SQLite3.gz") as r:
+        for ref in (
+            "Galatians 6:9", "2 Peter 3:9", "Deuteronomy 5:1", "Deuteronomy 6:4",
+            "Deuteronomy 6:5", "Deuteronomy 8:3", "Ephesians 1:4", "1 Thessalonians 1:9-10",
+        ):
+            cita, texto, error = r.resolve(ref)
+            assert error is None and texto, ref
+        assert r.resolve("Galatians 6:9")[1].startswith("इसलिए आओ हम भलाई करते कभी न थकें")
+
+
+def test_herv_only_merged_members_remain_empty():
+    """The 288 rows still empty are 286 verses merged into a neighbouring verse in the
+    original ERV plus 2 empty in the original. Update this number only with evidence."""
+    with _open("hi/HERV_hi.SQLite3.gz") as r:
+        r.cursor.execute("SELECT COUNT(*) FROM verses WHERE book_number<=730 AND TRIM(COALESCE(text,''))=''")
+        assert r.cursor.fetchone()[0] == 288
+        # a merged block resolves as a range, but its member verse alone does not
+        assert r.resolve("Hebrews 6:4-6")[2] is None
+        assert r.resolve("Hebrews 6:5")[2] is not None
+
 
 
 def test_herv_titus_is_complete():
