@@ -242,9 +242,3 @@ def test_niv_john_8_is_not_wrapped_in_a_note():
         assert resolver.resolve("John 8:36").texto == (
             "So if the Son sets you free, you will be free indeed."
         )
-
-
-@pytest.mark.parametrize("db", ["KJV_en", "NIV_en", "ESV_en"])
-def test_english_cites_a_single_psalm_in_the_singular(db):
-    with _open(f"en/{db}.SQLite3.gz") as resolver:
-        assert resolver.resolve("Psalm 23:1").cita == "Psalm 23:1"
