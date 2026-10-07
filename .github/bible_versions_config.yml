@@ -18,6 +18,8 @@ index:
 # Files must exist in the repo under the matching lang/ folder.
 # Each version entry: { name: "Display Name", strong: true|false, disclaimer: "..." (optional) }
 #   strong     — true if the DB embeds inline Strong's number tags (<S>NNNN</S>) in verse text.
+#   allowed_versions (per language, optional) — which version codes content may cite;
+#                defaults to [primary_version, fallback_version]; must all be in versions.
 #   disclaimer — optional license/copyright text shown by consumers (app/web) when the user
 #                downloads this version on demand. Omit for versions bundled with the app already.
 
@@ -27,6 +29,10 @@ languages:
     script: latin
     primary_version: KJV
     fallback_version: NIV
+    # Versions content (devotionals, encounters, discovery) may cite. Optional: when omitted
+    # it defaults to [primary_version, fallback_version]. KJ2000 is allowed because the
+    # English encounters/discovery text is KJ2000 wording.
+    allowed_versions: [KJV, NIV, KJ2000]
     reading_speed: { unit: wpm, rate: 200 }
     versions:
       KJV: { name: "King James Version", strong: true, disclaimer: "Public Domain (King James Version, 1611/1769)." }

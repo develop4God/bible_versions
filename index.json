@@ -50,7 +50,12 @@
           "url": "https://raw.githubusercontent.com/develop4God/bible_versions/main/en/ESV_en.SQLite3.gz",
           "hash": "2716d368b9d3d176"
         }
-      }
+      },
+      "allowed_versions": [
+        "KJV",
+        "NIV",
+        "KJ2000"
+      ]
     },
     "es": {
       "name": "Español",

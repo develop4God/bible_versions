@@ -68,6 +68,12 @@ def validate(config_languages: dict, disk_files: set[str]) -> bool:
             if expected_file not in disk_files:
                 errors.append(f"  MISSING FILE: {expected_file}  (declared in config)")
 
+    # allowed_versions (optional) must only name declared versions
+    for lang, lang_data in config_languages.items():
+        unknown = [v for v in lang_data.get("allowed_versions", []) if v not in lang_data["versions"]]
+        if unknown:
+            errors.append(f"  BAD allowed_versions for '{lang}': {unknown} not in its versions")
+
     # disk → config (orphan detection)
     declared_files = {
         f"{lang}/{vid}_{lang}.SQLite3.gz"
@@ -125,6 +131,8 @@ def build_index(config: dict) -> dict:
             "reading_speed":    lang_data["reading_speed"],
             "versions":         versions_out,
         }
+        if "allowed_versions" in lang_data:
+            out_languages[lang]["allowed_versions"] = list(lang_data["allowed_versions"])
 
     books_file = "bible_books.json"
     return {
