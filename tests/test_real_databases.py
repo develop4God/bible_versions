@@ -230,3 +230,15 @@ def test_range_past_end_of_titus_is_an_error_not_truncated():
     with _open("hi/HERV_hi.SQLite3.gz") as r:
         assert r.resolve("Titus 3:15")[2] is None
         assert r.resolve("Titus 3:15-16")[0] is None
+
+
+def test_niv_john_8_is_not_wrapped_in_a_note():
+    # The DB had <n>…</n> around John 8:12-59, which the cleaner strips as a
+    # footnote, blanking 48 verses of real text.
+    with _open("en/NIV_en.SQLite3.gz") as resolver:
+        for ref in ("John 8:12", "John 8:31-32", "John 8:36", "John 8:58"):
+            cita, texto, err = resolver.resolve(ref)
+            assert err is None and texto, ref
+        assert resolver.resolve("John 8:36").texto == (
+            "So if the Son sets you free, you will be free indeed."
+        )
