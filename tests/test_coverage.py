@@ -7,7 +7,12 @@ from pathlib import Path
 
 import pytest
 
-from bible_resolver import UnmappedBookWarning, VerseResolver, load_books_sot, resolve_book_title
+from bible_resolver import (
+    UnmappedBookWarning,
+    VerseResolver,
+    load_books_sot,
+    resolve_book_title,
+)
 from bible_resolver.book_name_normalizer import normalize_title
 
 ROOT = Path(__file__).parent.parent
@@ -64,9 +69,8 @@ def test_unconfigured_language_warns_once_per_book(make_db):
 
 def test_strict_raises_on_fallback(make_db):
     path = make_db([(10, "Genesis")], [(10, 1, 1, "x")], language="xx")
-    with VerseResolver(path, strict=True) as r:
-        with pytest.raises(LookupError, match="raw DB title"):
-            r.resolve("Genesis 1:1")
+    with VerseResolver(path, strict=True) as r, pytest.raises(LookupError, match="raw DB title"):
+        r.resolve("Genesis 1:1")
 
 
 def test_coverage_report_shape(make_db):

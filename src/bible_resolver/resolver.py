@@ -12,7 +12,7 @@ import os
 import re
 import sqlite3
 import warnings
-from functools import lru_cache
+from functools import cache
 from pathlib import Path
 from typing import NamedTuple, Self
 
@@ -36,7 +36,7 @@ class Resolution(NamedTuple):
     error: str | None
 
 
-@lru_cache(maxsize=None)
+@cache
 def _load_shifts_file() -> dict:
     with open(_VERSIFICATION_SHIFTS_PATH, encoding="utf-8") as source:
         return json.load(source)

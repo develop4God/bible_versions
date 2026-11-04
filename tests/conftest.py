@@ -1,5 +1,7 @@
 import sqlite3
+
 import pytest
+
 
 @pytest.fixture
 def make_db(tmp_path):

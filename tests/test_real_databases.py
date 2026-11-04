@@ -171,15 +171,15 @@ class TestEveryDatabase:
 
     def test_first_verse_of_every_book_resolves(self, db):
         with VerseResolver(db) as r:
-            for en in CANON:
+            for en, book_number in CANON.items():
                 if en in KNOWN_EMPTY_BOOKS.get(_id(db), ()):
                     continue
                 r.cursor.execute(
                     "SELECT chapter, verse FROM verses WHERE book_number=? AND TRIM(text) != '' ORDER BY chapter, verse LIMIT 1",
-                    (CANON[en],),
+                    (book_number,),
                 )
                 chapter, verse = r.cursor.fetchone()
-                cita, texto, error = r.resolve(f"{en} {chapter}:{verse}")
+                _, texto, error = r.resolve(f"{en} {chapter}:{verse}")
                 assert error is None, error
                 assert texto and "<" not in texto and "&quot;" not in texto
 
@@ -198,7 +198,7 @@ def test_herv_missing_verses_restored_from_original_erv():
             "Galatians 6:9", "2 Peter 3:9", "Deuteronomy 5:1", "Deuteronomy 6:4",
             "Deuteronomy 6:5", "Deuteronomy 8:3", "Ephesians 1:4", "1 Thessalonians 1:9-10",
         ):
-            cita, texto, error = r.resolve(ref)
+            _, texto, error = r.resolve(ref)
             assert error is None and texto, ref
         assert r.resolve("Galatians 6:9")[1].startswith("इसलिए आओ हम भलाई करते कभी न थकें")
 
@@ -237,7 +237,7 @@ def test_niv_john_8_is_not_wrapped_in_a_note():
     # footnote, blanking 48 verses of real text.
     with _open("en/NIV_en.SQLite3.gz") as resolver:
         for ref in ("John 8:12", "John 8:31-32", "John 8:36", "John 8:58"):
-            cita, texto, err = resolver.resolve(ref)
+            _, texto, err = resolver.resolve(ref)
             assert err is None and texto, ref
         assert resolver.resolve("John 8:36").texto == (
             "So if the Son sets you free, you will be free indeed."
