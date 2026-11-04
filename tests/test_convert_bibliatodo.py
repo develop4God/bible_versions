@@ -188,15 +188,111 @@ def test_rejects_non_canonical_book_order(tmp_path):
         convert(tmp_path)
 
 
-def test_rejects_null_verse_text(tmp_path):
+def test_rejects_source_whose_verse_text_is_all_null(tmp_path):
+    make_source(
+        tmp_path / "src.sqlite",
+        mutate=lambda s: s.execute("UPDATE versiculos SET texto=NULL"),
+    )
+    with pytest.raises(SystemExit, match="all verse text is empty"):
+        convert(tmp_path)
+
+
+def test_some_empty_or_null_verses_are_kept_as_empty_with_a_warning(
+    tmp_path, read, capsys
+):
     make_source(
         tmp_path / "src.sqlite",
         mutate=lambda s: s.execute(
             "UPDATE versiculos SET texto=NULL WHERE libro='GEN'"
         ),
     )
-    with pytest.raises(SystemExit):
+    db = read(convert(tmp_path))
+    assert db.execute("SELECT text FROM verses WHERE book_number=10").fetchone() == (
+        "",
+    )
+    assert db.execute("SELECT COUNT(*) FROM verses").fetchone() == (66,)
+    assert "1 verses have empty or blank text" in capsys.readouterr().err
+
+
+def test_whitespace_only_verse_is_stored_as_empty(tmp_path, read):
+    make_source(
+        tmp_path / "src.sqlite",
+        mutate=lambda s: s.execute(
+            "UPDATE versiculos SET texto='   ' WHERE libro='GEN'"
+        ),
+    )
+    db = read(convert(tmp_path))
+    assert db.execute("SELECT text FROM verses WHERE book_number=10").fetchone() == (
+        "",
+    )
+
+
+def test_missing_source_file_exits_cleanly(tmp_path):
+    with pytest.raises(SystemExit, match="source not found"):
         convert(tmp_path)
+
+
+def test_source_path_with_uri_special_characters(tmp_path):
+    src = tmp_path / "NTBT #2 100%?.sqlite"
+    make_source(src)
+    assert conv.convert(src, None, None, tmp_path / "o").exists()
+
+
+def test_contains_accents_false_for_ascii_text(tmp_path, read):
+    make_source(
+        tmp_path / "src.sqlite"
+    )  # fixture verses are "[Texto] <CODE>": ASCII only
+    db = read(convert(tmp_path))
+    assert db.execute(
+        "SELECT value FROM info WHERE name='contains_accents'"
+    ).fetchone() == ("false",)
+
+
+def test_contains_accents_true_when_text_has_accents(tmp_path, read):
+    make_source(
+        tmp_path / "src.sqlite",
+        mutate=lambda s: s.execute(
+            "UPDATE versiculos SET texto='Dios amó' WHERE libro='GEN'"
+        ),
+    )
+    db = read(convert(tmp_path))
+    assert db.execute(
+        "SELECT value FROM info WHERE name='contains_accents'"
+    ).fetchone() == ("true",)
+
+
+def test_color_for_rejects_numbers_above_the_last_band():
+    assert conv.color_for(730) == "#ff7c80"
+    with pytest.raises(ValueError, match="above the last colour band"):
+        conv.color_for(731)
+
+
+def test_truncated_source_with_mostly_empty_verses_is_rejected(tmp_path):
+    def blank_most(s):
+        for chapter in range(
+            2, conv.MAX_EMPTY_VERSES + 3
+        ):  # > MAX_EMPTY_VERSES empty, one verse left
+            s.execute(
+                "INSERT INTO versiculos VALUES('GEN',?,1,'',NULL,NULL,NULL,NULL)",
+                (chapter,),
+            )
+
+    make_source(tmp_path / "src.sqlite", mutate=blank_most)
+    with pytest.raises(SystemExit, match="looks truncated"):
+        convert(tmp_path)
+
+
+@pytest.mark.parametrize(
+    "text, expected",
+    [
+        ("Dios amó", True),
+        ("cafe\u0301", True),
+        ("plain ascii", False),
+        ("日本語", False),
+    ],
+)
+def test_has_accents_means_combining_marks_not_non_ascii(text, expected):
+    assert conv.has_accents([text]) is expected
 
 
 def test_rejects_duplicate_verses(tmp_path):

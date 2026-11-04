@@ -17,6 +17,8 @@ on:
       - ".github/bible_versions_config.yml"
       - "scripts/generate_index.py"
       - "scripts/generate_readme.py"
+      - "src/**"
+      - "pyproject.toml"
 
   # Allow manual trigger from Actions tab
   workflow_dispatch:
@@ -38,10 +40,10 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install pyyaml
+        run: pip install pyyaml .
 
       - name: Run generate_index.py
         run: python3 scripts/generate_index.py

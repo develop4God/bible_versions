@@ -9,7 +9,7 @@ be preserved).  Section titles become ``stories`` rows (order: encabezado, titul
 subtitulo).  Not carried over: ``referencias`` (HTML links), ``formato_capitulos``
 (paragraph/poetry structure) and, in the study edition, ``intro`` / ``nota``.
 
-Usage (needs the project installed, e.g. via ``uv run``):
+Usage (needs the project installed, hence ``uv run``):
     uv run python scripts/convert_bibliatodo.py NTBT.sqlite            # -> es/NTBT_es.SQLite3.gz
     uv run python scripts/convert_bibliatodo.py NTBT.sqlite --out-dir /tmp/out --version NTBT
 
@@ -31,6 +31,7 @@ import shutil
 import sqlite3
 import sys
 import tempfile
+import unicodedata
 from contextlib import closing
 from pathlib import Path
 
@@ -108,6 +109,9 @@ USFM_ORDER = [
     "REV",
 ]
 
+# More empty verses than this means a truncated or broken export (real editions omit only a few).
+MAX_EMPTY_VERSES = 50
+
 # MySword book colours, by book_number upper bound (same palette as the other DBs).
 COLORS = (
     (50, "#ccccff"),
@@ -135,7 +139,21 @@ def book_numbers() -> list[int]:
 
 
 def color_for(number: int) -> str:
-    return next(c for upper, c in COLORS if number <= upper)
+    try:
+        return next(c for upper, c in COLORS if number <= upper)
+    except StopIteration:
+        raise ValueError(
+            f"book number {number} is above the last colour band"
+        ) from None
+
+
+def has_accents(texts) -> bool:
+    """True if any text has a combining mark once decomposed (é -> e + U+0301)."""
+    return any(
+        unicodedata.combining(c)
+        for text in texts
+        for c in unicodedata.normalize("NFD", text)
+    )
 
 
 def read_source(s: sqlite3.Connection, lang: str | None, version: str | None):
@@ -169,8 +187,21 @@ def read_source(s: sqlite3.Connection, lang: str | None, version: str | None):
         f"SELECT libro, capitulo, versiculo, texto, {', '.join(opt)} "
         "FROM versiculos ORDER BY libro, capitulo, versiculo"
     ).fetchall()
-    if not verses or any(not (v[3] or "").strip() for v in verses):
-        sys.exit("source has no verses or contains empty verse text")
+    # NULL and whitespace-only text are both stored as ''
+    verses = [(*v[:3], v[3] if (v[3] or "").strip() else "", *v[4:]) for v in verses]
+    empty = [v[:3] for v in verses if not v[3].strip()]
+    if not verses or len(empty) == len(verses):
+        sys.exit("source has no verses or all verse text is empty")
+    if len(empty) > MAX_EMPTY_VERSES:
+        sys.exit(
+            f"{len(empty)} of {len(verses)} verses are empty: source looks truncated"
+        )
+    if empty:
+        # Some editions omit verses on purpose; they stay '' and the resolver reports them as empty.
+        print(
+            f"⚠️  {len(empty)} verses have empty or blank text (kept as in the source): {empty[:5]}",
+            file=sys.stderr,
+        )
     keys = [v[:3] for v in verses]
     if len(set(keys)) != len(keys):
         sys.exit("source contains duplicate (libro, capitulo, versiculo) rows")
@@ -186,7 +217,11 @@ def read_source(s: sqlite3.Connection, lang: str | None, version: str | None):
 
 
 def convert(src: Path, lang: str | None, version: str | None, out_dir: Path) -> Path:
-    with closing(sqlite3.connect(f"file:{src}?mode=ro", uri=True)) as source:
+    if not src.is_file():
+        sys.exit(f"source not found: {src}")
+    with closing(
+        sqlite3.connect(src.resolve().as_uri() + "?mode=ro", uri=True)
+    ) as source:
         lang, version, meta, libros, verses = read_source(source, lang, version)
     number = {code: n for (code, _, _), n in zip(libros, book_numbers())}
 
@@ -222,7 +257,7 @@ def convert(src: Path, lang: str | None, version: str | None, out_dir: Path) -> 
             "language": lang,
             "detailed_info": attribution,
             "history_of_changes": history,
-            "contains_accents": "true",
+            "contains_accents": str(has_accents(v[3] for v in verses)).lower(),
         }
         d.executemany("INSERT INTO info VALUES(?,?)", info.items())
         for code, _, name in libros:

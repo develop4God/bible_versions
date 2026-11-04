@@ -69,7 +69,7 @@ def _db_language_code(code: str | None) -> str | None:
     return "fil" if language == "tl" else language
 
 
-# Version IDs (``KJV``, ``RVR1909``, ``NTB-BR``) that may trail a reference; mirrored in scripts/convert_bibliatodo.py.
+# Version IDs (``KJV``, ``RVR1909``, ``NTB-BR``) that may trail a reference; imported by scripts/convert_bibliatodo.py, scripts/generate_index.py and the tests.
 VERSION_ID_PATTERN = r"[A-Z][A-Z0-9]{1,9}(?:-[A-Z0-9]{1,9})*"
 
 

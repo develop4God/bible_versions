@@ -20,6 +20,9 @@ index:
 #   strong     — true if the DB embeds inline Strong's number tags (<S>NNNN</S>) in verse text.
 #   allowed_versions (per language, optional) — which version codes content may cite;
 #                defaults to [primary_version, fallback_version]; must all be in versions.
+#   source     — optional provenance tag; only "bibliatodo" is known. Tagged versions get a row in
+#                the README credit table (built from `disclaimer`, which is then required).
+#                A version ID must match VERSION_ID_PATTERN (src/bible_resolver/resolver.py).
 #   disclaimer — optional license/copyright text shown by consumers (app/web) when the user
 #                downloads this version on demand. Omit for versions bundled with the app already.
 

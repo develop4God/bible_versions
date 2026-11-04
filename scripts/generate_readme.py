@@ -70,16 +70,15 @@ def build_version_tables(languages: dict) -> str:
 
 
 def build_bibliatodo_credits(languages: dict) -> str:
-    """Credit table for versions tagged ``source: bibliatodo``, from their ``disclaimer`` (a trailing URL is dropped)."""
+    """Credit table for versions with a ``source`` tag (validated by generate_index.py; only
+    ``bibliatodo`` exists), from their ``disclaimer`` (a trailing URL is dropped)."""
     rows = ["| Version | Language | Credit |", "|---|---|---|"]
     for lang, lang_data in languages.items():
         for version_id, version_data in lang_data["versions"].items():
-            if version_data.get("source") == "bibliatodo":
+            if version_data.get("source"):
                 disclaimer = version_data.get("disclaimer")
                 if not disclaimer:
-                    sys.exit(
-                        f"❌ {version_id}: 'source: bibliatodo' requires a disclaimer"
-                    )
+                    sys.exit(f"❌ {version_id}: a 'source' tag requires a disclaimer")
                 credit = re.sub(r"\s*https?://\S+$", "", disclaimer.strip())
                 rows.append(f"| {version_id} | `{lang}` | {credit} |")
     return "\n".join(rows)

@@ -6,10 +6,12 @@ Reads bible_versions_config.yml + scans filesystem → writes index.json.
 
 Validation rules:
   ERROR   config entry with no matching file on disk  → exit 1 (Action fails)
+  ERROR   version ID the resolver cannot strip from a reference → exit 1
+  ERROR   unknown `source` value on a version          → exit 1
   WARNING file on disk with no config entry           → logged, not fatal
 
-Run from repo root:
-  python3 scripts/generate_index.py
+Run from repo root (needs the project installed, hence `uv run`):
+  uv run python scripts/generate_index.py
 
 Exit codes:
   0  → index.json written (or unchanged)
@@ -19,6 +21,7 @@ Exit codes:
 
 import hashlib
 import json
+import re
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
@@ -29,10 +32,21 @@ except ImportError:
     print("❌ PyYAML not found. Run: pip install pyyaml --break-system-packages")
     sys.exit(1)
 
+try:
+    from bible_resolver.resolver import VERSION_ID_PATTERN
+except ImportError:
+    print(
+        "❌ bible_resolver not installed. Run: uv run python scripts/generate_index.py"
+    )
+    sys.exit(1)
+
 # ── Paths ─────────────────────────────────────────────────────────────────────
 REPO_ROOT = Path(__file__).parent.parent
 CONFIG_PATH = REPO_ROOT / ".github" / "bible_versions_config.yml"
 INDEX_PATH = REPO_ROOT / "index.json"
+
+# Values allowed in a version's optional `source` key (generate_readme.py builds credits from them).
+ALLOWED_SOURCES = {"bibliatodo"}
 
 
 def load_config() -> dict:
@@ -60,12 +74,34 @@ def validate(config_languages: dict, disk_files: set[str]) -> bool:
     errors = []
     warnings = []
 
-    # config → disk
+    # config → disk; version IDs must be strippable from 'John 3:16 <ID>' references;
+    # `source` must be known and requires the `disclaimer` it is credited with
     for lang, lang_data in config_languages.items():
-        for version_id in lang_data["versions"]:
+        for version_id, version_data in lang_data["versions"].items():
+            if not isinstance(version_data, dict):
+                errors.append(f"  BAD ENTRY '{lang}/{version_id}': expected a mapping")
+                continue
             expected_file = f"{lang}/{version_id}_{lang}.SQLite3.gz"
             if expected_file not in disk_files:
                 errors.append(f"  MISSING FILE: {expected_file}  (declared in config)")
+            if not (
+                isinstance(version_id, str)
+                and re.fullmatch(VERSION_ID_PATTERN, version_id)
+            ):
+                errors.append(
+                    f"  BAD VERSION ID '{lang}/{version_id}': must match {VERSION_ID_PATTERN}"
+                )
+            source = version_data.get("source")
+            if source is None:
+                continue
+            if source not in ALLOWED_SOURCES:
+                errors.append(
+                    f"  BAD source '{source}' on '{lang}/{version_id}': allowed {sorted(ALLOWED_SOURCES)}"
+                )
+            elif not version_data.get("disclaimer"):
+                errors.append(
+                    f"  MISSING disclaimer on '{lang}/{version_id}' (required by source '{source}')"
+                )
 
     # allowed_versions (optional) must only name declared versions
     for lang, lang_data in config_languages.items():
