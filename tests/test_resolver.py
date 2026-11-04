@@ -36,6 +36,7 @@ class TestParseRef:
         assert parse_en_ref("John 3:16 -BR") is None
         assert parse_en_ref("John 3:16 KJV-") is None
         assert parse_en_ref("John 3:16 A--B") is None
+        assert parse_en_ref("John 3:16 THISISNOTAVERSIONID") is None
 
 
 class TestCleanVerseText:

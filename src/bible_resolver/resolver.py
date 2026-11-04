@@ -72,7 +72,7 @@ def _db_language_code(code: str | None) -> str | None:
 def parse_en_ref(cita: str) -> tuple[str, int, int, int] | None:
     """Parse ``John 3:16`` and ``1 Corinthians 13:4-7`` references."""
     cita = cita.strip().translate(_DEVA)
-    cita = re.sub(r"\s+[A-Z][A-Z0-9]+(?:-[A-Z0-9]+)*$", "", cita).strip()
+    cita = re.sub(r"\s+[A-Z][A-Z0-9]{1,9}(?:-[A-Z0-9]{1,9})*$", "", cita).strip()
     match = re.match(
         r"^((?:\d\s+)?[A-Za-z]+(?:\s+[A-Za-z]+)*)\s+(\d+):(\d+)(?:-(\d+))?$",
         cita,

@@ -35,6 +35,13 @@ def test_no_tagged_versions_gives_header_only():
     assert gen.build_bibliatodo_credits(langs(A={"disclaimer": "d"})).count("\n") == 1
 
 
+def test_only_trailing_url_is_stripped():
+    table = gen.build_bibliatodo_credits(
+        langs(A={"source": "bibliatodo", "disclaimer": "See https://x.example for terms. By X. https://x.example/a"})
+    )
+    assert "| See https://x.example for terms. By X. |" in table
+
+
 def test_tagged_version_without_disclaimer_exits():
     with pytest.raises(SystemExit):
         gen.build_bibliatodo_credits(langs(NTBT={"source": "bibliatodo"}))
@@ -43,4 +50,6 @@ def test_tagged_version_without_disclaimer_exits():
 def test_readme_credit_block_is_in_sync_with_config():
     config = gen.load_config()["languages"]
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    assert gen.build_bibliatodo_credits(config) in readme
+    start, end = "<!-- AUTO-GENERATED:BIBLIATODO-CREDITS:START -->", "<!-- AUTO-GENERATED:BIBLIATODO-CREDITS:END -->"
+    block = readme.split(start, 1)[1].split(end, 1)[0].strip()
+    assert block == gen.build_bibliatodo_credits(config)

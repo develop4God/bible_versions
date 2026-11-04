@@ -138,7 +138,7 @@ def test_lang_and_version_overrides(tmp_path):
 
 
 @pytest.mark.parametrize(
-    "lang, version", [("ES", "TST"), ("es", "../evil"), ("es", "a b"), ("e", "TST")]
+    "lang, version", [("ES", "TST"), ("es", "../evil"), ("es", "a b"), ("e", "TST"), ("es", "-rf"), ("es", "--")]
 )
 def test_rejects_unsafe_lang_or_version(tmp_path, lang, version):
     make_source(tmp_path / "src.sqlite")
@@ -195,13 +195,23 @@ def test_rejects_unknown_book_code(tmp_path):
         convert(tmp_path)
 
 
-def test_source_connection_is_released_on_failure(tmp_path):
+def test_source_connection_is_released_on_failure(tmp_path, monkeypatch):
     make_source(tmp_path / "src.sqlite", schema="2")
+    opened = []
+    real_connect = sqlite3.connect
+
+    def spy(*args, **kwargs):
+        conn = real_connect(*args, **kwargs)
+        opened.append(conn)
+        return conn
+
+    monkeypatch.setattr(conv.sqlite3, "connect", spy)
     with pytest.raises(SystemExit):
         convert(tmp_path)
-    (
-        tmp_path / "src.sqlite"
-    ).unlink()  # fails on platforms that keep a leaked handle locked
+    assert opened
+    for conn in opened:
+        with pytest.raises(sqlite3.ProgrammingError):
+            conn.execute("SELECT 1")  # raises only if the connection was closed
 
 
 def test_rejects_book_without_verses(tmp_path):

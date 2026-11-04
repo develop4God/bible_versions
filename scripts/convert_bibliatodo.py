@@ -83,7 +83,7 @@ def read_source(s: sqlite3.Connection, lang: str | None, version: str | None):
     version = version or meta.get("version")
     if not lang or not version:
         sys.exit("source metadatos lacks idioma/version; pass --lang and --version")
-    if not re.fullmatch(r"[A-Za-z0-9-]+", version) or not re.fullmatch(
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9-]*", version) or not re.fullmatch(
         r"[a-z]{2,3}", lang
     ):
         sys.exit(f"bad version/lang: {version!r}/{lang!r}")
