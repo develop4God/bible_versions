@@ -165,11 +165,13 @@ Most Bible translation databases in this repository are sourced from [MyBible (p
 
 ### BibliaTodo translations (NTBT, BTNT, NTB-BR)
 
+<!-- AUTO-GENERATED:BIBLIATODO-CREDITS:START -->
 | Version | Language | Credit |
 |---|---|---|
-| NTBT | `es` | Santa Biblia, Nueva Traducción BibliaTodo (NTBT). Publicada por BibliaTodo Bible Society, sello editorial de BibliaTodo LLC. |
 | BTNT | `en` | Holy Bible, BibliaTodo New Translation (BTNT). Published by BibliaTodo Bible Society, an imprint of BibliaTodo LLC. |
+| NTBT | `es` | Santa Biblia, Nueva Traducción BibliaTodo (NTBT). Publicada por BibliaTodo Bible Society, sello editorial de BibliaTodo LLC. |
 | NTB-BR | `pt` | Bíblia Sagrada, Nova Tradução BibliaTodo (NTB-BR). Publicada por BibliaTodo Bible Society, selo editorial da BibliaTodo LLC. |
+<!-- AUTO-GENERATED:BIBLIATODO-CREDITS:END -->
 
 These texts come directly from [BibliaTodo Bible Society](https://www.bibliatodo.com/ntbt/) and are distributed under its [free, non-exclusive agreement](https://accounts.bibliatodo.com/es/ntbt/licencia) (no royalties). The wording is preserved unchanged, brackets included; only the file format was converted (`scripts/convert_bibliatodo.py`). Apps that show these versions must display the credit above, linking "BibliaTodo Bible Society" to the official page.
 

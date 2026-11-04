@@ -13,7 +13,7 @@ conv = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(conv)
 
 
-def make_source(path, schema="3", empty=False):
+def make_source(path, schema="3", empty=False, meta=None, mutate=None):
     s = sqlite3.connect(path)
     s.executescript(
         "CREATE TABLE libros(codigo TEXT PRIMARY KEY, orden INTEGER, nombre TEXT);"
@@ -27,23 +27,32 @@ def make_source(path, schema="3", empty=False):
             "INSERT INTO versiculos VALUES(?,?,?,?,?,?,?,NULL)",
             (code, 1, 1, "" if empty else f"[Texto] {code}", "Enc" if i == 19 else None, "Tit", None),
         )
-    s.executemany(
-        "INSERT INTO metadatos VALUES(?,?)",
-        [("schema", schema), ("idioma", "es"), ("version", "TST"), ("atribucion", "Crédito\nlínea 2")],
-    )
+    values = {"schema": schema, "idioma": "es", "version": "TST", "atribucion": "Crédito\nlínea 2"}
+    values.update(meta or {})
+    s.executemany("INSERT INTO metadatos VALUES(?,?)", [(k, v) for k, v in values.items() if v is not None])
+    if mutate:
+        mutate(s)
     s.commit()
     s.close()
 
 
-def read(out):
-    import tempfile
+@pytest.fixture
+def read(tmp_path):
+    """Open a converted .gz as sqlite; connections are closed at teardown."""
+    opened = []
 
-    tmp = Path(tempfile.mkdtemp()) / "x.db"
-    tmp.write_bytes(gzip.decompress(out.read_bytes()))
-    return sqlite3.connect(tmp)  # closed on garbage collection; tmp dir is throwaway
+    def _read(out):
+        db_file = tmp_path / f"read{len(opened)}.db"
+        db_file.write_bytes(gzip.decompress(out.read_bytes()))
+        opened.append(sqlite3.connect(db_file))
+        return opened[-1]
+
+    yield _read
+    for conn in opened:
+        conn.close()
 
 
-def test_converts_to_repo_layout(tmp_path):
+def test_converts_to_repo_layout(tmp_path, read):
     make_source(tmp_path / "src.sqlite")
     out = conv.convert(tmp_path / "src.sqlite", None, None, tmp_path / "o")
     assert out == tmp_path / "o" / "es" / "TST_es.SQLite3.gz"
@@ -75,9 +84,8 @@ def test_rejects_bad_sources(tmp_path, kw):
         conv.convert(tmp_path / "src.sqlite", None, None, tmp_path / "o")
 
 
-def test_optional_title_columns_may_be_absent(tmp_path):
+def test_optional_title_columns_may_be_absent(tmp_path, read):
     """EN/PT text editions ship versiculos(libro, capitulo, versiculo, texto) only."""
-    make_source(tmp_path / "full.sqlite")
     s = sqlite3.connect(tmp_path / "src.sqlite")
     s.executescript(
         "CREATE TABLE libros(codigo TEXT PRIMARY KEY, orden INTEGER, nombre TEXT);"
@@ -92,3 +100,72 @@ def test_optional_title_columns_may_be_absent(tmp_path):
     s.close()
     db = read(conv.convert(tmp_path / "src.sqlite", None, None, tmp_path / "o"))
     assert db.execute("SELECT COUNT(*) FROM stories").fetchone() == (0,)
+
+
+def convert(tmp_path, lang=None, version=None):
+    return conv.convert(tmp_path / "src.sqlite", lang, version, tmp_path / "o")
+
+
+def test_lang_and_version_overrides(tmp_path):
+    make_source(tmp_path / "src.sqlite")
+    out = convert(tmp_path, lang="pt", version="X-1")
+    assert out == tmp_path / "o" / "pt" / "X-1_pt.SQLite3.gz"
+
+
+@pytest.mark.parametrize("lang, version", [("ES", "TST"), ("es", "../evil"), ("es", "a b"), ("e", "TST")])
+def test_rejects_unsafe_lang_or_version(tmp_path, lang, version):
+    make_source(tmp_path / "src.sqlite", meta={"idioma": "es", "version": "TST"})
+    with pytest.raises(SystemExit):
+        convert(tmp_path, lang=lang, version=version)
+
+
+@pytest.mark.parametrize("missing", ["idioma", "version"])
+def test_missing_metadata_exits_cleanly(tmp_path, missing):
+    make_source(tmp_path / "src.sqlite")
+    s = sqlite3.connect(tmp_path / "src.sqlite")
+    s.execute("DELETE FROM metadatos WHERE clave=?", (missing,))
+    s.commit()
+    s.close()
+    with pytest.raises(SystemExit):
+        convert(tmp_path)
+
+
+def test_rejects_non_canonical_book_order(tmp_path):
+    make_source(tmp_path / "src.sqlite", mutate=lambda s: s.execute("UPDATE libros SET orden=2 WHERE codigo='GEN'"))
+    with pytest.raises(SystemExit):
+        convert(tmp_path)
+
+
+def test_rejects_null_verse_text(tmp_path):
+    make_source(tmp_path / "src.sqlite", mutate=lambda s: s.execute("UPDATE versiculos SET texto=NULL WHERE libro='GEN'"))
+    with pytest.raises(SystemExit):
+        convert(tmp_path)
+
+
+def test_rejects_duplicate_verses(tmp_path):
+    def dup(s):
+        s.execute("INSERT INTO versiculos VALUES('GEN',1,1,'dup',NULL,NULL,NULL,NULL)")
+
+    make_source(tmp_path / "src.sqlite", mutate=dup)
+    with pytest.raises(SystemExit):
+        convert(tmp_path)
+
+
+def test_rejects_book_without_verses(tmp_path):
+    make_source(tmp_path / "src.sqlite", mutate=lambda s: s.execute("DELETE FROM versiculos WHERE libro='REV'"))
+    with pytest.raises(SystemExit):
+        convert(tmp_path)
+
+
+@pytest.mark.parametrize("attribution", ["", "   ", None])
+def test_empty_attribution_falls_back_to_version(tmp_path, read, attribution):
+    make_source(tmp_path / "src.sqlite", meta={"atribucion": attribution})
+    db = read(convert(tmp_path))
+    assert db.execute("SELECT value FROM info WHERE name='description'").fetchone() == ("TST",)
+
+
+def test_history_without_identificacion_has_no_leading_space(tmp_path, read):
+    make_source(tmp_path / "src.sqlite")
+    db = read(convert(tmp_path))
+    (history,) = db.execute("SELECT value FROM info WHERE name='history_of_changes'").fetchone()
+    assert history == "TST converted by scripts/convert_bibliatodo.py"

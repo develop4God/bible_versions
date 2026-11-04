@@ -39,7 +39,7 @@ languages:
       NIV: { name: "New International Version", strong: false }
       KJ2000: { name: "King James 2000", strong: false }
       ESV: { name: "English Standard Version", strong: false }
-      BTNT: { name: "BibliaTodo New Translation", strong: false, disclaimer: "Holy Bible, BibliaTodo New Translation (BTNT). Published by BibliaTodo Bible Society, an imprint of BibliaTodo LLC. https://www.bibliatodo.com/en/ntbt/" }
+      BTNT: { source: bibliatodo, name: "BibliaTodo New Translation", strong: false, disclaimer: "Holy Bible, BibliaTodo New Translation (BTNT). Published by BibliaTodo Bible Society, an imprint of BibliaTodo LLC. https://www.bibliatodo.com/en/ntbt/" }
 
   es:
     name: "Español"
@@ -53,7 +53,7 @@ languages:
       NTV: { name: "Nueva Traducción Viviente", strong: false }
       RVR1909: { name: "Reina-Valera 1909", strong: true, disclaimer: "Texto de dominio público (Reina-Valera 1909)." }
       LBLA: { name: "La Biblia de las Américas", strong: true, disclaimer: "Copyright © 1986, 1995, 1997 by The Lockman Foundation. Todos los derechos reservados." }
-      NTBT: { name: "Nueva Traducción BibliaTodo", strong: false, disclaimer: "Santa Biblia, Nueva Traducción BibliaTodo (NTBT). Publicada por BibliaTodo Bible Society, sello editorial de BibliaTodo LLC. https://www.bibliatodo.com/ntbt/" }
+      NTBT: { source: bibliatodo, name: "Nueva Traducción BibliaTodo", strong: false, disclaimer: "Santa Biblia, Nueva Traducción BibliaTodo (NTBT). Publicada por BibliaTodo Bible Society, sello editorial de BibliaTodo LLC. https://www.bibliatodo.com/ntbt/" }
 
   pt:
     name: "Português"
@@ -65,7 +65,7 @@ languages:
       ARC: { name: "Almeida Revista e Corrigida", strong: false }
       NVI: { name: "Nova Versão Internacional", strong: false }
       ARA: { name: "Almeida Revista e Atualizada", strong: false, disclaimer: "© 1993 Sociedade Bíblica do Brasil. Todos os direitos reservados." }
-      NTB-BR: { name: "Nova Tradução BibliaTodo", strong: false, disclaimer: "Bíblia Sagrada, Nova Tradução BibliaTodo (NTB-BR). Publicada por BibliaTodo Bible Society, selo editorial da BibliaTodo LLC. https://www.bibliatodo.com/pt/ntbt/" }
+      NTB-BR: { source: bibliatodo, name: "Nova Tradução BibliaTodo", strong: false, disclaimer: "Bíblia Sagrada, Nova Tradução BibliaTodo (NTB-BR). Publicada por BibliaTodo Bible Society, selo editorial da BibliaTodo LLC. https://www.bibliatodo.com/pt/ntbt/" }
 
   fr:
     name: "Français"

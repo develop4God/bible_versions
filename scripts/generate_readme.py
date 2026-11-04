@@ -63,6 +63,17 @@ def build_version_tables(languages: dict) -> str:
     return "\n\n".join(blocks)
 
 
+def build_bibliatodo_credits(languages: dict) -> str:
+    """Credit table for versions tagged ``source: bibliatodo``, from their ``disclaimer`` (URL dropped)."""
+    rows = ["| Version | Language | Credit |", "|---|---|---|"]
+    for lang, lang_data in languages.items():
+        for version_id, version_data in lang_data["versions"].items():
+            if version_data.get("source") == "bibliatodo":
+                credit = re.sub(r"\s*https?://\S+$", "", version_data["disclaimer"])
+                rows.append(f"| {version_id} | `{lang}` | {credit} |")
+    return "\n".join(rows)
+
+
 def build_badges(languages: dict) -> str:
     version_count = sum(len(ld["versions"]) for ld in languages.values())
     return (
@@ -81,6 +92,7 @@ def update_readme(languages: dict) -> bool:
     original = README_PATH.read_text(encoding="utf-8")
     updated = replace_marker_block(original, "BADGES", build_badges(languages))
     updated = replace_marker_block(updated, "VERSION-TABLES", build_version_tables(languages))
+    updated = replace_marker_block(updated, "BIBLIATODO-CREDITS", build_bibliatodo_credits(languages))
 
     if updated == original:
         print("✅ README.md unchanged — no commit needed")

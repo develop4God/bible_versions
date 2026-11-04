@@ -27,6 +27,7 @@ import argparse
 import gzip
 import json
 import re
+import shutil
 import sqlite3
 import sys
 import tempfile
@@ -68,8 +69,10 @@ def convert(src: Path, lang: str | None, version: str | None, out_dir: Path) -> 
     meta = dict(s.execute("SELECT clave, valor FROM metadatos"))
     if meta.get("schema") != "3":
         sys.exit(f"unsupported BibliaTodo schema {meta.get('schema')!r} (expected '3')")
-    lang = lang or meta["idioma"]
-    version = version or meta["version"]
+    lang = lang or meta.get("idioma")
+    version = version or meta.get("version")
+    if not lang or not version:
+        sys.exit("source metadatos lacks idioma/version; pass --lang and --version")
     if not re.fullmatch(r"[A-Za-z0-9-]+", version) or not re.fullmatch(r"[a-z]{2,3}", lang):
         sys.exit(f"bad version/lang: {version!r}/{lang!r}")
 
@@ -86,8 +89,15 @@ def convert(src: Path, lang: str | None, version: str | None, out_dir: Path) -> 
         f"SELECT libro, capitulo, versiculo, texto, {', '.join(opt)} "
         "FROM versiculos ORDER BY libro, capitulo, versiculo"
     ).fetchall()
-    if not verses or any(not v[3].strip() for v in verses):
+    s.close()
+    if not verses or any(not (v[3] or "").strip() for v in verses):
         sys.exit("source has no verses or contains empty verse text")
+    keys = [v[:3] for v in verses]
+    if len(set(keys)) != len(keys):
+        sys.exit("source contains duplicate (libro, capitulo, versiculo) rows")
+    missing = set(USFM_ORDER) - {v[0] for v in verses}
+    if missing:
+        sys.exit(f"source has no verses for books: {sorted(missing)}")
 
     with tempfile.TemporaryDirectory() as tmp:
         db_path = Path(tmp) / "out.db"
@@ -109,11 +119,15 @@ def convert(src: Path, lang: str | None, version: str | None, out_dir: Path) -> 
               PRIMARY KEY(book_number, chapter, verse, order_if_several));
             """
         )
+        attribution = (meta.get("atribucion") or "").strip()
+        history = " ".join(
+            part for part in ((meta.get("identificacion") or "").strip(), f"{version} converted by scripts/convert_bibliatodo.py") if part
+        )
         info = {
-            "description": meta.get("atribucion", version).splitlines()[0],
+            "description": attribution.splitlines()[0] if attribution else version,
             "language": lang,
-            "detailed_info": meta.get("atribucion", ""),
-            "history_of_changes": f"{meta.get('identificacion', '')} (converted by scripts/convert_bibliatodo.py)",
+            "detailed_info": attribution,
+            "history_of_changes": history,
             "contains_accents": "true",
         }
         d.executemany("INSERT INTO info VALUES(?,?)", info.items())
@@ -121,12 +135,14 @@ def convert(src: Path, lang: str | None, version: str | None, out_dir: Path) -> 
             row = (number[code], color_for(number[code]), name, name)
             d.execute("INSERT INTO books_all VALUES(?,?,?,?,1)", row)
             d.execute("INSERT INTO books VALUES(?,?,?,?)", row)
-        stories = []
-        for code, ch, vs, text, enc, tit, sub in verses:
-            n = number[code]
-            d.execute("INSERT INTO verses VALUES(?,?,?,?)", (n, ch, vs, text))
-            titles = [t.strip() for t in (enc, tit, sub) if t and t.strip()]
-            stories += [(n, ch, vs, i, t) for i, t in enumerate(titles)]
+        d.executemany(
+            "INSERT INTO verses VALUES(?,?,?,?)", ((number[c], ch, vs, text) for c, ch, vs, text, *_ in verses)
+        )
+        stories = [
+            (number[code], ch, vs, i, t)
+            for code, ch, vs, _, *heads in verses
+            for i, t in enumerate(h.strip() for h in heads if h and h.strip())
+        ]
         d.executemany("INSERT INTO stories VALUES(?,?,?,?,?)", stories)
         d.commit()
         d.execute("VACUUM")
@@ -134,8 +150,12 @@ def convert(src: Path, lang: str | None, version: str | None, out_dir: Path) -> 
 
         out = out_dir / lang / f"{version}_{lang}.SQLite3.gz"
         out.parent.mkdir(parents=True, exist_ok=True)
-        with open(out, "wb") as raw, gzip.GzipFile(fileobj=raw, mode="wb", mtime=0, filename="") as gz:
-            gz.write(db_path.read_bytes())
+        with (
+            open(db_path, "rb") as src_db,
+            open(out, "wb") as raw,
+            gzip.GzipFile(fileobj=raw, mode="wb", mtime=0, filename="") as gz,
+        ):
+            shutil.copyfileobj(src_db, gz)
     print(f"✅ {out}  ({len(verses)} verses, {len(stories)} section titles)")
     return out
 
