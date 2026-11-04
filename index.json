@@ -56,12 +56,7 @@
           "file": "BTNT_en.SQLite3.gz",
           "url": "https://raw.githubusercontent.com/develop4God/bible_versions/main/en/BTNT_en.SQLite3.gz",
           "hash": "2db8fec7578865c6",
-          "disclaimer": "Holy Bible, BibliaTodo New Translation (BTNT). Published by BibliaTodo Bible Society, an imprint of BibliaTodo LLC. https://www.bibliatodo.com/en/ntbt/",
-          "copyright": {
-            "holder": "BibliaTodo LLC (BibliaTodo Bible Society)",
-            "license": "Free, non-exclusive distribution license (BibliaTodo agreement v1.3)",
-            "license_url": "https://accounts.bibliatodo.com/es/ntbt/licencia"
-          }
+          "disclaimer": "Holy Bible, BibliaTodo New Translation (BTNT). Published by BibliaTodo Bible Society, an imprint of BibliaTodo LLC. https://www.bibliatodo.com/en/ntbt/"
         }
       },
       "allowed_versions": [
@@ -123,12 +118,7 @@
           "file": "NTBT_es.SQLite3.gz",
           "url": "https://raw.githubusercontent.com/develop4God/bible_versions/main/es/NTBT_es.SQLite3.gz",
           "hash": "20c932b693960a22",
-          "disclaimer": "Santa Biblia, Nueva Traducción BibliaTodo (NTBT). Publicada por BibliaTodo Bible Society, sello editorial de BibliaTodo LLC. https://www.bibliatodo.com/ntbt/",
-          "copyright": {
-            "holder": "BibliaTodo LLC (BibliaTodo Bible Society)",
-            "license": "Free, non-exclusive distribution license (BibliaTodo agreement v1.3)",
-            "license_url": "https://accounts.bibliatodo.com/es/ntbt/licencia"
-          }
+          "disclaimer": "Santa Biblia, Nueva Traducción BibliaTodo (NTBT). Publicada por BibliaTodo Bible Society, sello editorial de BibliaTodo LLC. https://www.bibliatodo.com/ntbt/"
         }
       }
     },
@@ -170,12 +160,7 @@
           "file": "NTB-BR_pt.SQLite3.gz",
           "url": "https://raw.githubusercontent.com/develop4God/bible_versions/main/pt/NTB-BR_pt.SQLite3.gz",
           "hash": "0158a80726d37050",
-          "disclaimer": "Bíblia Sagrada, Nova Tradução BibliaTodo (NTB-BR). Publicada por BibliaTodo Bible Society, selo editorial da BibliaTodo LLC. https://www.bibliatodo.com/pt/ntbt/",
-          "copyright": {
-            "holder": "BibliaTodo LLC (BibliaTodo Bible Society)",
-            "license": "Free, non-exclusive distribution license (BibliaTodo agreement v1.3)",
-            "license_url": "https://accounts.bibliatodo.com/es/ntbt/licencia"
-          }
+          "disclaimer": "Bíblia Sagrada, Nova Tradução BibliaTodo (NTB-BR). Publicada por BibliaTodo Bible Society, selo editorial da BibliaTodo LLC. https://www.bibliatodo.com/pt/ntbt/"
         }
       }
     },

@@ -121,8 +121,6 @@ def build_index(config: dict) -> dict:
             }
             if "disclaimer" in version_data:
                 entry["disclaimer"] = version_data["disclaimer"]
-            if "copyright" in version_data:
-                entry["copyright"] = version_data["copyright"]
             versions_out[version_id] = entry
 
         out_languages[lang] = {

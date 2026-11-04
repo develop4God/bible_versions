@@ -20,8 +20,6 @@ index:
 #   strong     — true if the DB embeds inline Strong's number tags (<S>NNNN</S>) in verse text.
 #   allowed_versions (per language, optional) — which version codes content may cite;
 #                defaults to [primary_version, fallback_version]; must all be in versions.
-#   copyright  — optional structured rights info copied verbatim into index.json:
-#                { holder: "...", license: "...", license_url: "https://..." }
 #   disclaimer — optional license/copyright text shown by consumers (app/web) when the user
 #                downloads this version on demand. Omit for versions bundled with the app already.
 
@@ -41,7 +39,7 @@ languages:
       NIV: { name: "New International Version", strong: false }
       KJ2000: { name: "King James 2000", strong: false }
       ESV: { name: "English Standard Version", strong: false }
-      BTNT: { name: "BibliaTodo New Translation", strong: false, disclaimer: "Holy Bible, BibliaTodo New Translation (BTNT). Published by BibliaTodo Bible Society, an imprint of BibliaTodo LLC. https://www.bibliatodo.com/en/ntbt/", copyright: { holder: "BibliaTodo LLC (BibliaTodo Bible Society)", license: "Free, non-exclusive distribution license (BibliaTodo agreement v1.3)", license_url: "https://accounts.bibliatodo.com/es/ntbt/licencia" } }
+      BTNT: { name: "BibliaTodo New Translation", strong: false, disclaimer: "Holy Bible, BibliaTodo New Translation (BTNT). Published by BibliaTodo Bible Society, an imprint of BibliaTodo LLC. https://www.bibliatodo.com/en/ntbt/" }
 
   es:
     name: "Español"
@@ -55,7 +53,7 @@ languages:
       NTV: { name: "Nueva Traducción Viviente", strong: false }
       RVR1909: { name: "Reina-Valera 1909", strong: true, disclaimer: "Texto de dominio público (Reina-Valera 1909)." }
       LBLA: { name: "La Biblia de las Américas", strong: true, disclaimer: "Copyright © 1986, 1995, 1997 by The Lockman Foundation. Todos los derechos reservados." }
-      NTBT: { name: "Nueva Traducción BibliaTodo", strong: false, disclaimer: "Santa Biblia, Nueva Traducción BibliaTodo (NTBT). Publicada por BibliaTodo Bible Society, sello editorial de BibliaTodo LLC. https://www.bibliatodo.com/ntbt/", copyright: { holder: "BibliaTodo LLC (BibliaTodo Bible Society)", license: "Free, non-exclusive distribution license (BibliaTodo agreement v1.3)", license_url: "https://accounts.bibliatodo.com/es/ntbt/licencia" } }
+      NTBT: { name: "Nueva Traducción BibliaTodo", strong: false, disclaimer: "Santa Biblia, Nueva Traducción BibliaTodo (NTBT). Publicada por BibliaTodo Bible Society, sello editorial de BibliaTodo LLC. https://www.bibliatodo.com/ntbt/" }
 
   pt:
     name: "Português"
@@ -67,7 +65,7 @@ languages:
       ARC: { name: "Almeida Revista e Corrigida", strong: false }
       NVI: { name: "Nova Versão Internacional", strong: false }
       ARA: { name: "Almeida Revista e Atualizada", strong: false, disclaimer: "© 1993 Sociedade Bíblica do Brasil. Todos os direitos reservados." }
-      NTB-BR: { name: "Nova Tradução BibliaTodo", strong: false, disclaimer: "Bíblia Sagrada, Nova Tradução BibliaTodo (NTB-BR). Publicada por BibliaTodo Bible Society, selo editorial da BibliaTodo LLC. https://www.bibliatodo.com/pt/ntbt/", copyright: { holder: "BibliaTodo LLC (BibliaTodo Bible Society)", license: "Free, non-exclusive distribution license (BibliaTodo agreement v1.3)", license_url: "https://accounts.bibliatodo.com/es/ntbt/licencia" } }
+      NTB-BR: { name: "Nova Tradução BibliaTodo", strong: false, disclaimer: "Bíblia Sagrada, Nova Tradução BibliaTodo (NTB-BR). Publicada por BibliaTodo Bible Society, selo editorial da BibliaTodo LLC. https://www.bibliatodo.com/pt/ntbt/" }
 
   fr:
     name: "Français"
