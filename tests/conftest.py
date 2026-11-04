@@ -1,5 +1,7 @@
 import sqlite3
+
 import pytest
+
 
 @pytest.fixture
 def make_db(tmp_path):
@@ -8,7 +10,9 @@ def make_db(tmp_path):
     def _make(books, verses, language=None, name="test.SQLite3"):
         path = tmp_path / name
         conn = sqlite3.connect(path)
-        conn.execute("CREATE TABLE books (book_number INTEGER PRIMARY KEY, long_name TEXT)")
+        conn.execute(
+            "CREATE TABLE books (book_number INTEGER PRIMARY KEY, long_name TEXT)"
+        )
         conn.execute(
             "CREATE TABLE verses (book_number INTEGER, chapter INTEGER, verse INTEGER, text TEXT)"
         )

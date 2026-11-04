@@ -30,8 +30,12 @@ def cache(monkeypatch, tmp_path):
     monkeypatch.delenv("BIBLE_VERSIONS_DIR", raising=False)
 
 
-@pytest.mark.parametrize("lang,version,entry", ALL, ids=[f"{v}_{lang}" for lang, v, _ in ALL])
-def test_every_listed_database_resolves_in_place_with_matching_hash(lang, version, entry):
+@pytest.mark.parametrize(
+    "lang,version,entry", ALL, ids=[f"{v}_{lang}" for lang, v, _ in ALL]
+)
+def test_every_listed_database_resolves_in_place_with_matching_hash(
+    lang, version, entry
+):
     with warnings.catch_warnings():
         warnings.simplefilter("error")
         path = database_path(lang, version)
@@ -55,8 +59,23 @@ def test_env_var_selects_another_checkout(monkeypatch, tmp_path):
     (tmp_path / "es").mkdir()
     blob = gzip.compress(b"db")
     (tmp_path / "es" / "X_es.SQLite3.gz").write_bytes(blob)
-    (tmp_path / "index.json").write_text(json.dumps({"languages": {"es": {"versions": {"X": {
-        "file": "X_es.SQLite3.gz", "hash": sot.content_hash(blob), "url": "u"}}}}}))
+    (tmp_path / "index.json").write_text(
+        json.dumps(
+            {
+                "languages": {
+                    "es": {
+                        "versions": {
+                            "X": {
+                                "file": "X_es.SQLite3.gz",
+                                "hash": sot.content_hash(blob),
+                                "url": "u",
+                            }
+                        }
+                    }
+                }
+            }
+        )
+    )
     monkeypatch.setenv("BIBLE_VERSIONS_DIR", str(tmp_path))
     assert database_path("es", "X") == tmp_path / "es" / "X_es.SQLite3.gz"
 
@@ -64,8 +83,23 @@ def test_env_var_selects_another_checkout(monkeypatch, tmp_path):
 def test_checkout_hash_drift_warns(tmp_path):
     (tmp_path / "es").mkdir()
     (tmp_path / "es" / "X_es.SQLite3.gz").write_bytes(b"changed")
-    (tmp_path / "index.json").write_text(json.dumps({"languages": {"es": {"versions": {"X": {
-        "file": "X_es.SQLite3.gz", "hash": "deadbeef", "url": "u"}}}}}))
+    (tmp_path / "index.json").write_text(
+        json.dumps(
+            {
+                "languages": {
+                    "es": {
+                        "versions": {
+                            "X": {
+                                "file": "X_es.SQLite3.gz",
+                                "hash": "deadbeef",
+                                "url": "u",
+                            }
+                        }
+                    }
+                }
+            }
+        )
+    )
     with pytest.warns(UserWarning, match="differs from index.json"):
         database_path("es", "X", root=tmp_path)
 
@@ -77,8 +111,19 @@ def test_bad_explicit_root_is_a_clear_error(tmp_path):
 
 def fake_remote(monkeypatch, blob, *, hash_=None, offline=False):
     calls = []
-    index = {"languages": {"es": {"versions": {"X": {
-        "file": "X_es.SQLite3.gz", "hash": hash_ or sot.content_hash(blob), "url": "https://x/db"}}}}}
+    index = {
+        "languages": {
+            "es": {
+                "versions": {
+                    "X": {
+                        "file": "X_es.SQLite3.gz",
+                        "hash": hash_ or sot.content_hash(blob),
+                        "url": "https://x/db",
+                    }
+                }
+            }
+        }
+    }
 
     def fetch(url):
         calls.append(url)

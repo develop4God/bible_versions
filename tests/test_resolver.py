@@ -26,20 +26,39 @@ class TestParseRef:
         assert parse_en_ref("John 3:16 KJV") == ("John", 3, 16, 16)
         assert parse_en_ref("John ३:१६") == ("John", 3, 16, 16)
 
+    @pytest.mark.parametrize("version", ["NTB-BR", "RVR1909", "KJ2000", "BTNT", "NTBT"])
+    def test_version_suffix_with_hyphen_or_long_id(self, version):
+        assert parse_en_ref(f"John 3:16 {version}") == ("John", 3, 16, 16)
+        assert parse_en_ref(f"1 Corinthians 13:4-7 {version}") == (
+            "1 Corinthians",
+            13,
+            4,
+            7,
+        )
+
     def test_unparseable(self):
         assert parse_en_ref("not a ref") is None
+        assert parse_en_ref("John 3:16 -BR") is None
+        assert parse_en_ref("John 3:16 KJV-") is None
+        assert parse_en_ref("John 3:16 A--B") is None
+        assert parse_en_ref("John 3:16 THISISNOTAVERSIONID") is None
 
 
 class TestCleanVerseText:
     def test_footnote_and_note_elements_dropped_with_content(self):
-        assert clean_verse_text("In<f>[3]</f> the<n>〔注：或〕</n> beginning") == "In the beginning"
+        assert (
+            clean_verse_text("In<f>[3]</f> the<n>〔注：或〕</n> beginning")
+            == "In the beginning"
+        )
 
     def test_note_containing_nested_footnote_is_dropped_whole(self):
         raw = "不能胜过他<n>〔『权柄』原文是『<f>[30]</f>门』〕</n>。"
         assert clean_verse_text(raw) == "不能胜过他。"
 
     def test_other_tags_keep_content(self):
-        assert clean_verse_text("<pb/><t> Car qui </t><J>a connu</J>") == "Car qui a connu"
+        assert (
+            clean_verse_text("<pb/><t> Car qui </t><J>a connu</J>") == "Car qui a connu"
+        )
 
     def test_circled_markers_and_space_before_punctuation(self):
         assert clean_verse_text("Dieu ① est , bon !") == "Dieu est, bon!"
@@ -75,7 +94,9 @@ class TestBookNameFallbacks:
     def test_missing_books_table_falls_back_to_english(self, tmp_path):
         path = tmp_path / "m.SQLite3"
         conn = sqlite3.connect(path)
-        conn.execute("CREATE TABLE verses (book_number INTEGER, chapter INTEGER, verse INTEGER, text TEXT)")
+        conn.execute(
+            "CREATE TABLE verses (book_number INTEGER, chapter INTEGER, verse INTEGER, text TEXT)"
+        )
         conn.execute("INSERT INTO verses VALUES (10, 1, 1, 'x')")
         conn.commit()
         conn.close()
@@ -88,12 +109,19 @@ class TestBookNameFallbacks:
 
 class TestVersificationShift:
     def test_german_joel_shift_applies_by_db_filename_and_language(self, make_db):
-        path = make_db([(360, "Joel")], [(360, 3, 1, "geist")], language="de", name="LU17_de.SQLite3")
+        path = make_db(
+            [(360, "Joel")],
+            [(360, 3, 1, "geist")],
+            language="de",
+            name="LU17_de.SQLite3",
+        )
         with VerseResolver(path) as r:
             assert r.resolve("Joel 2:28") == ("Joel 3:1", "geist", None)
 
     def test_no_shift_for_other_version(self, make_db):
-        path = make_db([(360, "Joel")], [(360, 2, 28, "x")], language="de", name="OTHER_de.SQLite3")
+        path = make_db(
+            [(360, "Joel")], [(360, 2, 28, "x")], language="de", name="OTHER_de.SQLite3"
+        )
         with VerseResolver(path) as r:
             assert r.resolve("Joel 2:28")[0] == "Joel 2:28"
 
@@ -161,19 +189,37 @@ class TestVersificationRanges:
             assert r.resolve("Joel 2:28-29") == ("Joel 3:1-2", "a b", None)
 
     def test_unlisted_range_is_untouched(self, make_db):
-        path = make_db([(360, "Joel")], [(360, 2, 1, "a")], language="de", name="LU17_de.SQLite3")
+        path = make_db(
+            [(360, "Joel")], [(360, 2, 1, "a")], language="de", name="LU17_de.SQLite3"
+        )
         with VerseResolver(path) as r:
             assert r.resolve("Joel 2:1")[0] == "Joel 2:1"
 
 
 class TestParseRefNegatives:
-    @pytest.mark.parametrize("bad", ["", "John", "John 3", "John 3:", "3:16", "John 3:16-", "John 3:16 kjv extra words"])
+    @pytest.mark.parametrize(
+        "bad",
+        [
+            "",
+            "John",
+            "John 3",
+            "John 3:",
+            "3:16",
+            "John 3:16-",
+            "John 3:16 kjv extra words",
+        ],
+    )
     def test_rejected(self, bad):
         assert parse_en_ref(bad) is None
 
     def test_multiword_and_numbered_books(self):
         assert parse_en_ref("Song of Solomon 2:1") == ("Song of Solomon", 2, 1, 1)
-        assert parse_en_ref("1 Thessalonians 5:16-18 NIV") == ("1 Thessalonians", 5, 16, 18)
+        assert parse_en_ref("1 Thessalonians 5:16-18 NIV") == (
+            "1 Thessalonians",
+            5,
+            16,
+            18,
+        )
 
 
 class TestLanguageNormalization:
@@ -181,4 +227,7 @@ class TestLanguageNormalization:
     def test_primary_subtag_is_used(self, make_db, raw):
         path = make_db([(490, "लूका रचित सुसमाचार")], [(490, 1, 1, "t")], language=raw)
         with VerseResolver(path) as r:
-            assert r.language == raw.strip().replace("_", "-").split("-")[0].split()[0].lower()
+            assert (
+                r.language
+                == raw.strip().replace("_", "-").split("-")[0].split()[0].lower()
+            )
