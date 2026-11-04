@@ -116,9 +116,8 @@ def convert(tmp_path, lang=None, version=None):
     return conv.convert(tmp_path / "src.sqlite", lang, version, tmp_path / "o")
 
 
-def test_converter_and_resolver_agree_on_version_ids():
-    """A version ID the converter accepts is exactly one the resolver strips from a reference."""
-    assert conv.VERSION_ID_PATTERN == resolver.VERSION_ID_PATTERN
+def test_accepted_version_ids_are_exactly_those_the_resolver_strips():
+    assert conv.VERSION_ID_PATTERN is resolver.VERSION_ID_PATTERN
     for ok in ("KJV", "RVR1909", "NTB-BR", "KJ2000"):
         assert parse_en_ref(f"John 3:16 {ok}") == ("John", 3, 16, 16)
     for bad in ("2024", "tst", "TST-", "A" * 11):

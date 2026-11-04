@@ -64,7 +64,7 @@ def build_version_tables(languages: dict) -> str:
 
 
 def build_bibliatodo_credits(languages: dict) -> str:
-    """Credit table for versions tagged ``source: bibliatodo``, from their ``disclaimer`` (URL dropped)."""
+    """Credit table for versions tagged ``source: bibliatodo``, from their ``disclaimer`` (a trailing URL is dropped)."""
     rows = ["| Version | Language | Credit |", "|---|---|---|"]
     for lang, lang_data in languages.items():
         for version_id, version_data in lang_data["versions"].items():

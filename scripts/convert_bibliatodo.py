@@ -9,9 +9,9 @@ be preserved).  Section titles become ``stories`` rows (order: encabezado, titul
 subtitulo).  Not carried over: ``referencias`` (HTML links), ``formato_capitulos``
 (paragraph/poetry structure) and, in the study edition, ``intro`` / ``nota``.
 
-Usage:
-    python scripts/convert_bibliatodo.py NTBT.sqlite            # -> es/NTBT_es.SQLite3.gz
-    python scripts/convert_bibliatodo.py NTBT.sqlite --out-dir /tmp/out --version NTBT
+Usage (needs the project installed, e.g. via ``uv run``):
+    uv run python scripts/convert_bibliatodo.py NTBT.sqlite            # -> es/NTBT_es.SQLite3.gz
+    uv run python scripts/convert_bibliatodo.py NTBT.sqlite --out-dir /tmp/out --version NTBT
 
 Language and version come from the source's ``metadatos`` (``idioma`` / ``version``);
 ``--lang`` / ``--version`` override them.  The result is written as
@@ -34,6 +34,8 @@ import tempfile
 from contextlib import closing
 from pathlib import Path
 
+from bible_resolver.resolver import VERSION_ID_PATTERN
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 # Canonical order of the 66 books (USFM codes); ``libros.orden`` must follow it.
@@ -52,11 +54,6 @@ COLORS = (
     (460, "#ffff99"), (500, "#ff6600"), (510, "#00ffff"), (650, "#ffff00"),
     (720, "#00ff00"), (730, "#ff7c80"),
 )
-
-
-# Must stay equal to the version-suffix pattern in ``bible_resolver.resolver.parse_en_ref``
-# (enforced by tests): a version ID the resolver cannot strip from a reference is unusable.
-VERSION_ID_PATTERN = r"[A-Z][A-Z0-9]{1,9}(?:-[A-Z0-9]{1,9})*"
 
 
 def book_numbers() -> list[int]:
@@ -81,6 +78,7 @@ def read_source(s: sqlite3.Connection, lang: str | None, version: str | None):
     version = version or meta.get("version")
     if not lang or not version:
         sys.exit("source metadatos lacks idioma/version; pass --lang and --version")
+    # A version ID must be one the resolver can strip from a reference (VERSION_ID_PATTERN).
     if not re.fullmatch(VERSION_ID_PATTERN, version) or not re.fullmatch(r"[a-z]{2,3}", lang):
         sys.exit(f"bad version/lang: {version!r}/{lang!r}")
 
