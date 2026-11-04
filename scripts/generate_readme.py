@@ -69,7 +69,10 @@ def build_bibliatodo_credits(languages: dict) -> str:
     for lang, lang_data in languages.items():
         for version_id, version_data in lang_data["versions"].items():
             if version_data.get("source") == "bibliatodo":
-                credit = re.sub(r"\s*https?://\S+$", "", version_data["disclaimer"])
+                disclaimer = version_data.get("disclaimer")
+                if not disclaimer:
+                    sys.exit(f"❌ {version_id}: 'source: bibliatodo' requires a disclaimer")
+                credit = re.sub(r"\s*https?://\S+", "", disclaimer).strip()
                 rows.append(f"| {version_id} | `{lang}` | {credit} |")
     return "\n".join(rows)
 

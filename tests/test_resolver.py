@@ -34,6 +34,8 @@ class TestParseRef:
     def test_unparseable(self):
         assert parse_en_ref("not a ref") is None
         assert parse_en_ref("John 3:16 -BR") is None
+        assert parse_en_ref("John 3:16 KJV-") is None
+        assert parse_en_ref("John 3:16 A--B") is None
 
 
 class TestCleanVerseText:

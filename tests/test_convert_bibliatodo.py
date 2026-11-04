@@ -8,7 +8,9 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).parent.parent
-spec = importlib.util.spec_from_file_location("convert_bibliatodo", ROOT / "scripts" / "convert_bibliatodo.py")
+spec = importlib.util.spec_from_file_location(
+    "convert_bibliatodo", ROOT / "scripts" / "convert_bibliatodo.py"
+)
 conv = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(conv)
 
@@ -25,11 +27,27 @@ def make_source(path, schema="3", empty=False, meta=None, mutate=None):
         s.execute("INSERT INTO libros VALUES(?,?,?)", (code, i, f"Libro {code}"))
         s.execute(
             "INSERT INTO versiculos VALUES(?,?,?,?,?,?,?,NULL)",
-            (code, 1, 1, "" if empty else f"[Texto] {code}", "Enc" if i == 19 else None, "Tit", None),
+            (
+                code,
+                1,
+                1,
+                "" if empty else f"[Texto] {code}",
+                "Enc" if i == 19 else None,
+                "Tit",
+                None,
+            ),
         )
-    values = {"schema": schema, "idioma": "es", "version": "TST", "atribucion": "Crédito\nlínea 2"}
+    values = {
+        "schema": schema,
+        "idioma": "es",
+        "version": "TST",
+        "atribucion": "Crédito\nlínea 2",
+    }
     values.update(meta or {})
-    s.executemany("INSERT INTO metadatos VALUES(?,?)", [(k, v) for k, v in values.items() if v is not None])
+    s.executemany(
+        "INSERT INTO metadatos VALUES(?,?)",
+        [(k, v) for k, v in values.items() if v is not None],
+    )
     if mutate:
         mutate(s)
     s.commit()
@@ -57,13 +75,17 @@ def test_converts_to_repo_layout(tmp_path, read):
     out = conv.convert(tmp_path / "src.sqlite", None, None, tmp_path / "o")
     assert out == tmp_path / "o" / "es" / "TST_es.SQLite3.gz"
     db = read(out)
-    assert db.execute("SELECT value FROM info WHERE name='language'").fetchone() == ("es",)
+    assert db.execute("SELECT value FROM info WHERE name='language'").fetchone() == (
+        "es",
+    )
     assert db.execute("SELECT COUNT(*) FROM books").fetchone() == (66,)
     # USFM -> MySword numbers: GEN=10, PSA=230 (gaps in the numbering), REV=730
     nums = dict(db.execute("SELECT long_name, book_number FROM books"))
     assert (nums["Libro GEN"], nums["Libro PSA"], nums["Libro REV"]) == (10, 230, 730)
     # text is verbatim, brackets included
-    assert db.execute("SELECT text FROM verses WHERE book_number=10").fetchone() == ("[Texto] GEN",)
+    assert db.execute("SELECT text FROM verses WHERE book_number=10").fetchone() == (
+        "[Texto] GEN",
+    )
     # Psalms: encabezado then titulo, ordered
     assert db.execute(
         "SELECT order_if_several, title FROM stories WHERE book_number=230 ORDER BY 1"
@@ -95,7 +117,10 @@ def test_optional_title_columns_may_be_absent(tmp_path, read):
     for i, code in enumerate(conv.USFM_ORDER, 1):
         s.execute("INSERT INTO libros VALUES(?,?,?)", (code, i, code))
         s.execute("INSERT INTO versiculos VALUES(?,1,1,'t')", (code,))
-    s.executemany("INSERT INTO metadatos VALUES(?,?)", [("schema", "3"), ("idioma", "en"), ("version", "BTNT")])
+    s.executemany(
+        "INSERT INTO metadatos VALUES(?,?)",
+        [("schema", "3"), ("idioma", "en"), ("version", "BTNT")],
+    )
     s.commit()
     s.close()
     db = read(conv.convert(tmp_path / "src.sqlite", None, None, tmp_path / "o"))
@@ -112,10 +137,12 @@ def test_lang_and_version_overrides(tmp_path):
     assert out == tmp_path / "o" / "pt" / "X-1_pt.SQLite3.gz"
 
 
-@pytest.mark.parametrize("lang, version", [("ES", "TST"), ("es", "../evil"), ("es", "a b"), ("e", "TST")])
+@pytest.mark.parametrize(
+    "lang, version", [("ES", "TST"), ("es", "../evil"), ("es", "a b"), ("e", "TST")]
+)
 def test_rejects_unsafe_lang_or_version(tmp_path, lang, version):
-    make_source(tmp_path / "src.sqlite", meta={"idioma": "es", "version": "TST"})
-    with pytest.raises(SystemExit):
+    make_source(tmp_path / "src.sqlite")
+    with pytest.raises(SystemExit, match="bad version/lang"):
         convert(tmp_path, lang=lang, version=version)
 
 
@@ -126,18 +153,26 @@ def test_missing_metadata_exits_cleanly(tmp_path, missing):
     s.execute("DELETE FROM metadatos WHERE clave=?", (missing,))
     s.commit()
     s.close()
-    with pytest.raises(SystemExit):
+    with pytest.raises(SystemExit, match="lacks idioma/version"):
         convert(tmp_path)
 
 
 def test_rejects_non_canonical_book_order(tmp_path):
-    make_source(tmp_path / "src.sqlite", mutate=lambda s: s.execute("UPDATE libros SET orden=2 WHERE codigo='GEN'"))
+    make_source(
+        tmp_path / "src.sqlite",
+        mutate=lambda s: s.execute("UPDATE libros SET orden=2 WHERE codigo='GEN'"),
+    )
     with pytest.raises(SystemExit):
         convert(tmp_path)
 
 
 def test_rejects_null_verse_text(tmp_path):
-    make_source(tmp_path / "src.sqlite", mutate=lambda s: s.execute("UPDATE versiculos SET texto=NULL WHERE libro='GEN'"))
+    make_source(
+        tmp_path / "src.sqlite",
+        mutate=lambda s: s.execute(
+            "UPDATE versiculos SET texto=NULL WHERE libro='GEN'"
+        ),
+    )
     with pytest.raises(SystemExit):
         convert(tmp_path)
 
@@ -151,8 +186,29 @@ def test_rejects_duplicate_verses(tmp_path):
         convert(tmp_path)
 
 
+def test_rejects_unknown_book_code(tmp_path):
+    def add(s):
+        s.execute("INSERT INTO versiculos VALUES('XXX',1,1,'x',NULL,NULL,NULL,NULL)")
+
+    make_source(tmp_path / "src.sqlite", mutate=add)
+    with pytest.raises(SystemExit, match="unknown books"):
+        convert(tmp_path)
+
+
+def test_source_connection_is_released_on_failure(tmp_path):
+    make_source(tmp_path / "src.sqlite", schema="2")
+    with pytest.raises(SystemExit):
+        convert(tmp_path)
+    (
+        tmp_path / "src.sqlite"
+    ).unlink()  # fails on platforms that keep a leaked handle locked
+
+
 def test_rejects_book_without_verses(tmp_path):
-    make_source(tmp_path / "src.sqlite", mutate=lambda s: s.execute("DELETE FROM versiculos WHERE libro='REV'"))
+    make_source(
+        tmp_path / "src.sqlite",
+        mutate=lambda s: s.execute("DELETE FROM versiculos WHERE libro='REV'"),
+    )
     with pytest.raises(SystemExit):
         convert(tmp_path)
 
@@ -161,11 +217,28 @@ def test_rejects_book_without_verses(tmp_path):
 def test_empty_attribution_falls_back_to_version(tmp_path, read, attribution):
     make_source(tmp_path / "src.sqlite", meta={"atribucion": attribution})
     db = read(convert(tmp_path))
-    assert db.execute("SELECT value FROM info WHERE name='description'").fetchone() == ("TST",)
+    assert db.execute("SELECT value FROM info WHERE name='description'").fetchone() == (
+        "TST",
+    )
 
 
-def test_history_without_identificacion_has_no_leading_space(tmp_path, read):
+def test_history_without_identificacion(tmp_path, read):
     make_source(tmp_path / "src.sqlite")
     db = read(convert(tmp_path))
-    (history,) = db.execute("SELECT value FROM info WHERE name='history_of_changes'").fetchone()
-    assert history == "TST converted by scripts/convert_bibliatodo.py"
+    (history,) = db.execute(
+        "SELECT value FROM info WHERE name='history_of_changes'"
+    ).fetchone()
+    assert history == "converted by scripts/convert_bibliatodo.py"
+
+
+def test_history_with_identificacion(tmp_path, read):
+    make_source(
+        tmp_path / "src.sqlite", meta={"identificacion": "BibliaTodo NTBT 2024"}
+    )
+    db = read(convert(tmp_path))
+    (history,) = db.execute(
+        "SELECT value FROM info WHERE name='history_of_changes'"
+    ).fetchone()
+    assert (
+        history == "BibliaTodo NTBT 2024 (converted by scripts/convert_bibliatodo.py)"
+    )

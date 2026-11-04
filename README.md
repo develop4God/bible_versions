@@ -163,7 +163,7 @@ If you'd like to suggest a new version or language, report an issue with the dat
 
 Most Bible translation databases in this repository are sourced from [MyBible (ph4.org)](https://www.ph4.org/b4_1.php?l=en). Each translation retains its own copyright and license terms as set by its respective publisher/rights holder — some (e.g. KJV, LSG1910) are public domain, while others (e.g. NIV, ESV) are commercially copyrighted with restrictions on redistribution and usage.
 
-### BibliaTodo translations (NTBT, BTNT, NTB-BR)
+### BibliaTodo translations
 
 <!-- AUTO-GENERATED:BIBLIATODO-CREDITS:START -->
 | Version | Language | Credit |

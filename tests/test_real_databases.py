@@ -247,8 +247,10 @@ def test_niv_john_8_is_not_wrapped_in_a_note():
 @pytest.mark.parametrize("version_id", ["NTB-BR_pt", "BTNT_en", "NTBT_es", "RVR1909_es"])
 def test_version_suffix_reference_resolves_against_real_db(version_id):
     """A reference with the version ID appended (hyphenated or 7 chars long) resolves like a bare one."""
-    lang = version_id.rsplit("_", 1)[1]
+    version, lang = version_id.rsplit("_", 1)
     with _open(f"{lang}/{version_id}.SQLite3.gz") as r:
         bare = r.resolve("John 3:16")
-        suffixed = r.resolve(f"John 3:16 {version_id.rsplit('_', 1)[0]}")
-    assert bare.error is None and suffixed == bare
+        suffixed = r.resolve(f"John 3:16 {version}")
+    assert bare.error is None, bare.error
+    assert suffixed.error is None, f"suffix '{version}' not stripped: {suffixed.error}"
+    assert (suffixed.cita, suffixed.texto) == (bare.cita, bare.texto)

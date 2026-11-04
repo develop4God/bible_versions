@@ -31,6 +31,7 @@ import shutil
 import sqlite3
 import sys
 import tempfile
+from contextlib import closing
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -45,16 +46,25 @@ USFM_ORDER = (
 
 # MySword book colours, by book_number upper bound (same palette as the other DBs).
 COLORS = (
-    (50, "#ccccff"), (190, "#ffcc99"), (260, "#66ff99"), (340, "#ff9fb4"),
-    (460, "#ffff99"), (500, "#ff6600"), (510, "#00ffff"), (650, "#ffff00"),
-    (720, "#00ff00"), (730, "#ff7c80"),
+    (50, "#ccccff"),
+    (190, "#ffcc99"),
+    (260, "#66ff99"),
+    (340, "#ff9fb4"),
+    (460, "#ffff99"),
+    (500, "#ff6600"),
+    (510, "#00ffff"),
+    (650, "#ffff00"),
+    (720, "#00ff00"),
+    (730, "#ff7c80"),
 )
 
 
 def book_numbers() -> list[int]:
     """The 66 canonical MySword numbers, ascending == canonical order (``bible_books.json``)."""
     data = json.loads((REPO_ROOT / "bible_books.json").read_text("utf-8"))
-    nums = sorted({entry["book_number"] for entry in data["books"].values()})  # aliases share a number
+    nums = sorted(
+        {entry["book_number"] for entry in data["books"].values()}
+    )  # aliases share a number
     if len(nums) != 66:
         sys.exit(f"bible_books.json must list 66 books, found {len(nums)}")
     return nums
@@ -64,8 +74,8 @@ def color_for(number: int) -> str:
     return next(c for upper, c in COLORS if number <= upper)
 
 
-def convert(src: Path, lang: str | None, version: str | None, out_dir: Path) -> Path:
-    s = sqlite3.connect(f"file:{src}?mode=ro", uri=True)
+def read_source(s: sqlite3.Connection, lang: str | None, version: str | None):
+    """Validate the BibliaTodo source and return ``(lang, version, meta, libros, verses)``; exits cleanly if bad."""
     meta = dict(s.execute("SELECT clave, valor FROM metadatos"))
     if meta.get("schema") != "3":
         sys.exit(f"unsupported BibliaTodo schema {meta.get('schema')!r} (expected '3')")
@@ -73,13 +83,18 @@ def convert(src: Path, lang: str | None, version: str | None, out_dir: Path) -> 
     version = version or meta.get("version")
     if not lang or not version:
         sys.exit("source metadatos lacks idioma/version; pass --lang and --version")
-    if not re.fullmatch(r"[A-Za-z0-9-]+", version) or not re.fullmatch(r"[a-z]{2,3}", lang):
+    if not re.fullmatch(r"[A-Za-z0-9-]+", version) or not re.fullmatch(
+        r"[a-z]{2,3}", lang
+    ):
         sys.exit(f"bad version/lang: {version!r}/{lang!r}")
 
-    libros = s.execute("SELECT codigo, orden, nombre FROM libros ORDER BY orden").fetchall()
-    if [c for c, _, _ in libros] != USFM_ORDER or [o for _, o, _ in libros] != list(range(1, 67)):
+    libros = s.execute(
+        "SELECT codigo, orden, nombre FROM libros ORDER BY orden"
+    ).fetchall()
+    if [c for c, _, _ in libros] != USFM_ORDER or [o for _, o, _ in libros] != list(
+        range(1, 67)
+    ):
         sys.exit("libros is not the 66 canonical books in canonical order")
-    number = {code: n for (code, _, _), n in zip(libros, book_numbers())}
 
     # encabezado / titulo / subtitulo / referencias are optional columns: BibliaTodo only
     # includes them when the edition has data (the EN and PT text editions have none).
@@ -89,15 +104,26 @@ def convert(src: Path, lang: str | None, version: str | None, out_dir: Path) -> 
         f"SELECT libro, capitulo, versiculo, texto, {', '.join(opt)} "
         "FROM versiculos ORDER BY libro, capitulo, versiculo"
     ).fetchall()
-    s.close()
     if not verses or any(not (v[3] or "").strip() for v in verses):
         sys.exit("source has no verses or contains empty verse text")
     keys = [v[:3] for v in verses]
     if len(set(keys)) != len(keys):
         sys.exit("source contains duplicate (libro, capitulo, versiculo) rows")
-    missing = set(USFM_ORDER) - {v[0] for v in verses}
+    present = {v[0] for v in verses}
+    if present - set(USFM_ORDER):
+        sys.exit(
+            f"source has verses for unknown books: {sorted(present - set(USFM_ORDER))}"
+        )
+    missing = set(USFM_ORDER) - present
     if missing:
         sys.exit(f"source has no verses for books: {sorted(missing)}")
+    return lang, version, meta, libros, verses
+
+
+def convert(src: Path, lang: str | None, version: str | None, out_dir: Path) -> Path:
+    with closing(sqlite3.connect(f"file:{src}?mode=ro", uri=True)) as source:
+        lang, version, meta, libros, verses = read_source(source, lang, version)
+    number = {code: n for (code, _, _), n in zip(libros, book_numbers())}
 
     with tempfile.TemporaryDirectory() as tmp:
         db_path = Path(tmp) / "out.db"
@@ -120,8 +146,11 @@ def convert(src: Path, lang: str | None, version: str | None, out_dir: Path) -> 
             """
         )
         attribution = (meta.get("atribucion") or "").strip()
-        history = " ".join(
-            part for part in ((meta.get("identificacion") or "").strip(), f"{version} converted by scripts/convert_bibliatodo.py") if part
+        ident = (meta.get("identificacion") or "").strip()
+        history = (
+            f"{ident} (converted by scripts/convert_bibliatodo.py)"
+            if ident
+            else "converted by scripts/convert_bibliatodo.py"
         )
         info = {
             "description": attribution.splitlines()[0] if attribution else version,
@@ -136,7 +165,8 @@ def convert(src: Path, lang: str | None, version: str | None, out_dir: Path) -> 
             d.execute("INSERT INTO books_all VALUES(?,?,?,?,1)", row)
             d.execute("INSERT INTO books VALUES(?,?,?,?)", row)
         d.executemany(
-            "INSERT INTO verses VALUES(?,?,?,?)", ((number[c], ch, vs, text) for c, ch, vs, text, *_ in verses)
+            "INSERT INTO verses VALUES(?,?,?,?)",
+            ((number[c], ch, vs, text) for c, ch, vs, text, *_ in verses),
         )
         stories = [
             (number[code], ch, vs, i, t)
@@ -161,9 +191,18 @@ def convert(src: Path, lang: str | None, version: str | None, out_dir: Path) -> 
 
 
 def main() -> None:
-    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("source", type=Path, help="BibliaTodo *-sqlite NTBT.sqlite (text edition)")
-    p.add_argument("--out-dir", type=Path, default=REPO_ROOT, help="repo root to write {lang}/ into")
+    p = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    p.add_argument(
+        "source", type=Path, help="BibliaTodo *-sqlite NTBT.sqlite (text edition)"
+    )
+    p.add_argument(
+        "--out-dir",
+        type=Path,
+        default=REPO_ROOT,
+        help="repo root to write {lang}/ into",
+    )
     p.add_argument("--lang")
     p.add_argument("--version")
     a = p.parse_args()
