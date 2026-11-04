@@ -161,9 +161,19 @@ If you'd like to suggest a new version or language, report an issue with the dat
 
 ## Copyright & Disclaimer
 
-The Bible translation databases in this repository are sourced from [MyBible (ph4.org)](https://www.ph4.org/b4_1.php?l=en). Each translation retains its own copyright and license terms as set by its respective publisher/rights holder — some (e.g. KJV, LSG1910) are public domain, while others (e.g. NIV, ESV) are commercially copyrighted with restrictions on redistribution and usage.
+Most Bible translation databases in this repository are sourced from [MyBible (ph4.org)](https://www.ph4.org/b4_1.php?l=en). Each translation retains its own copyright and license terms as set by its respective publisher/rights holder — some (e.g. KJV, LSG1910) are public domain, while others (e.g. NIV, ESV) are commercially copyrighted with restrictions on redistribution and usage.
 
-This repository does not claim ownership of any Bible text. For authoritative licensing and attribution details on a specific translation, refer to [ph4.org](https://www.ph4.org/b4_1.php?l=en). If you plan to redistribute or use these texts beyond personal/app-internal use, verify the license terms for that specific version first.
+### BibliaTodo translations (NTBT, BTNT, NTB-BR)
+
+| Version | Language | Credit |
+|---|---|---|
+| NTBT | `es` | Santa Biblia, Nueva Traducción BibliaTodo (NTBT). Publicada por BibliaTodo Bible Society, sello editorial de BibliaTodo LLC. |
+| BTNT | `en` | Holy Bible, BibliaTodo New Translation (BTNT). Published by BibliaTodo Bible Society, an imprint of BibliaTodo LLC. |
+| NTB-BR | `pt` | Bíblia Sagrada, Nova Tradução BibliaTodo (NTB-BR). Publicada por BibliaTodo Bible Society, selo editorial da BibliaTodo LLC. |
+
+These texts come directly from [BibliaTodo Bible Society](https://www.bibliatodo.com/ntbt/) and are distributed under its [free, non-exclusive agreement](https://accounts.bibliatodo.com/es/ntbt/licencia) (no royalties). The wording is preserved unchanged, brackets included; only the file format was converted (`scripts/convert_bibliatodo.py`). Apps that show these versions must display the credit above, linking "BibliaTodo Bible Society" to the official page.
+
+This repository does not claim ownership of any Bible text. For authoritative licensing and attribution details on a specific translation, refer to [ph4.org](https://www.ph4.org/b4_1.php?l=en) or, for BibliaTodo versions, the agreement above. If you plan to redistribute or use these texts beyond personal/app-internal use, verify the license terms for that specific version first.
 
 The code in this repository (scripts, index generation, tooling) is licensed under the [MIT License](LICENSE).
 
