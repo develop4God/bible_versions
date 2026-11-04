@@ -52,7 +52,9 @@ def test_golden_citations_match():
 
     current = {_id(db): citations(db) for db in ALL_DBS}
     if os.environ.get("UPDATE_GOLDEN"):
-        GOLDEN.write_text(json.dumps(current, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+        GOLDEN.write_text(
+            json.dumps(current, ensure_ascii=False, indent=1) + "\n", encoding="utf-8"
+        )
     assert current == json.loads(GOLDEN.read_text("utf-8"))
 
 
@@ -69,7 +71,10 @@ def test_unconfigured_language_warns_once_per_book(make_db):
 
 def test_strict_raises_on_fallback(make_db):
     path = make_db([(10, "Genesis")], [(10, 1, 1, "x")], language="xx")
-    with VerseResolver(path, strict=True) as r, pytest.raises(LookupError, match="raw DB title"):
+    with (
+        VerseResolver(path, strict=True) as r,
+        pytest.raises(LookupError, match="raw DB title"),
+    ):
         r.resolve("Genesis 1:1")
 
 
@@ -77,12 +82,21 @@ def test_coverage_report_shape(make_db):
     path = make_db([(10, "Genesis"), (999, "Odd")], [(10, 1, 1, "x")], language="en")
     with VerseResolver(path) as r:
         report = r.coverage()
-    assert report["language"] == "en" and report["mapped"] == [10] and report["unmapped"] == [999]
+    assert (
+        report["language"] == "en"
+        and report["mapped"] == [10]
+        and report["unmapped"] == [999]
+    )
 
 
 @pytest.mark.parametrize(
     "raw,expected",
-    [("Lamentations\n", "Lamentations"), ("腓立比书 ", "腓立比书"), ("Mga Gawa", "Mga Gawa"), ("  A   B ", "A B")],
+    [
+        ("Lamentations\n", "Lamentations"),
+        ("腓立比书 ", "腓立比书"),
+        ("Mga Gawa", "Mga Gawa"),
+        ("  A   B ", "A B"),
+    ],
 )
 def test_title_whitespace_is_normalized(raw, expected):
     assert normalize_title(raw) == expected
@@ -90,13 +104,26 @@ def test_title_whitespace_is_normalized(raw, expected):
 
 def test_passthrough_keeps_db_title_but_normalizes():
     assert resolve_book_title("腓立比书 ", 570, "zh") == ("腓立比书", "passthrough")
-    assert resolve_book_title("マタイの福音書", 470, "ja") == ("マタイの福音書", "passthrough")
+    assert resolve_book_title("マタイの福音書", 470, "ja") == (
+        "マタイの福音書",
+        "passthrough",
+    )
 
 
 @pytest.mark.parametrize("lang", ["ar", "de", "en", "es", "fr", "fil", "hi", "pt"])
 def test_language_maps_are_complete_and_unique(lang):
-    names = json.loads((ROOT / f"src/bible_resolver/data/book_name_sanitizers/{lang}.json").read_text("utf-8"))["book_names"]
-    keep = set(json.loads((ROOT / f"src/bible_resolver/data/book_name_sanitizers/{lang}.json").read_text("utf-8")).get("keep_db_title", []))
+    names = json.loads(
+        (ROOT / f"src/bible_resolver/data/book_name_sanitizers/{lang}.json").read_text(
+            "utf-8"
+        )
+    )["book_names"]
+    keep = set(
+        json.loads(
+            (
+                ROOT / f"src/bible_resolver/data/book_name_sanitizers/{lang}.json"
+            ).read_text("utf-8")
+        ).get("keep_db_title", [])
+    )
     assert not keep & {int(k) for k in names}, "a book is both mapped and keep_db_title"
     assert {int(k) for k in names} | keep >= set(CANON) - {10000}
     canon_names = [names[str(b)] for b in CANON if str(b) in names]

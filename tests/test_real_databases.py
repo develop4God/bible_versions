@@ -14,7 +14,11 @@ from bible_resolver import VerseResolver, load_books_sot
 
 ROOT = Path(__file__).parent.parent
 ALL_DBS = sorted(glob.glob(str(ROOT / "*/*.SQLite3.gz")))
-CANON = {n: b for n, b in load_books_sot().items() if b <= 730 and n not in {"Psalm", "Song of Songs"}}
+CANON = {
+    n: b
+    for n, b in load_books_sot().items()
+    if b <= 730 and n not in {"Psalm", "Song of Songs"}
+}
 # Languages with a sanitizer config: citations must be short and free of descriptive wrappers.
 LONG_FORM_MARKERS = {
     "hi": ["नामक", "पुस्तक", "रचित", "सुसमाचार", "वृत्तान्त", "पत्री"],
@@ -79,7 +83,9 @@ class TestChinese:
 
     def test_verse_notes_are_stripped_across_whole_bible(self, db):
         with _open(db) as r:
-            r.cursor.execute("SELECT book_number, chapter, verse FROM verses LIMIT 4000")
+            r.cursor.execute(
+                "SELECT book_number, chapter, verse FROM verses LIMIT 4000"
+            )
             for book, chapter, verse in r.cursor.fetchall()[::40]:
                 text = r.cursor.execute(
                     "SELECT text FROM verses WHERE book_number=? AND chapter=? AND verse=?",
@@ -98,11 +104,27 @@ class TestChinese:
         ("pt/ARC_pt.SQLite3.gz", "1 Peter 5:7", "1 Pedro 5:7"),  # raw: "1 S. Pedro"
         ("pt/ARC_pt.SQLite3.gz", "Song of Solomon 2:1", "Cantares 2:1"),
         ("pt/ARC_pt.SQLite3.gz", "Hosea 6:6", "Oséias 6:6"),
-        ("pt/ARA_pt.SQLite3.gz", "Genesis 1:1", "Gênesis 1:1"),  # raw: "O Primeiro Livro de Moisés chamado Gênesis"
-        ("pt/ARA_pt.SQLite3.gz", "John 3:16", "João 3:16"),  # raw: "O Evangelho segundo João"
-        ("pt/ARA_pt.SQLite3.gz", "Romans 8:28", "Romanos 8:28"),  # raw: "Epístola de Paulo aos Romanos"
+        (
+            "pt/ARA_pt.SQLite3.gz",
+            "Genesis 1:1",
+            "Gênesis 1:1",
+        ),  # raw: "O Primeiro Livro de Moisés chamado Gênesis"
+        (
+            "pt/ARA_pt.SQLite3.gz",
+            "John 3:16",
+            "João 3:16",
+        ),  # raw: "O Evangelho segundo João"
+        (
+            "pt/ARA_pt.SQLite3.gz",
+            "Romans 8:28",
+            "Romanos 8:28",
+        ),  # raw: "Epístola de Paulo aos Romanos"
         ("pt/ARA_pt.SQLite3.gz", "1 Thessalonians 5:16", "1 Tessalonicenses 5:16"),
-        ("pt/ARA_pt.SQLite3.gz", "Revelation 22:21", "Apocalipse 22:21"),  # raw: "Apocalipse de João"
+        (
+            "pt/ARA_pt.SQLite3.gz",
+            "Revelation 22:21",
+            "Apocalipse 22:21",
+        ),  # raw: "Apocalipse de João"
         ("pt/NVI_pt.SQLite3.gz", "Ezra 7:10", "Esdras 7:10"),  # raw has Cyrillic "Е"
         ("pt/NVI_pt.SQLite3.gz", "Amos 5:24", "Amós 5:24"),  # raw has Cyrillic "А"
         ("pt/NVI_pt.SQLite3.gz", "Micah 6:8", "Miqueias 6:8"),  # raw has Cyrillic "М"
@@ -117,7 +139,9 @@ def test_portuguese_long_and_irregular_names(db, ref, expected):
 def test_arc_range_and_texts_resolve():
     with _open("pt/ARC_pt.SQLite3.gz") as r:
         cita, texto, error = r.resolve("1 Corinthians 13:4-7")
-        assert error is None and cita == "1 Coríntios 13:4-7" and "amor" in texto.lower()
+        assert (
+            error is None and cita == "1 Coríntios 13:4-7" and "amor" in texto.lower()
+        )
 
 
 # ── Arabic / German / French regressions ───────────────────────────────────
@@ -139,7 +163,9 @@ def test_german_shifts_and_short_names(db):
     with _open(db) as r:
         cita, texto, error = r.resolve("Joel 2:28")
         assert error is None and cita.endswith("3:1") and texto
-        assert r.resolve("Genesis 1:1")[0] == "1. Mose 1:1"  # raw: "Das erste Buch Mose (Genesis)"
+        assert (
+            r.resolve("Genesis 1:1")[0] == "1. Mose 1:1"
+        )  # raw: "Das erste Buch Mose (Genesis)"
         assert r.resolve("Malachi 4:2")[2] is None
 
 
@@ -154,7 +180,9 @@ class TestEveryDatabase:
                     "SELECT 1 FROM verses WHERE book_number=? LIMIT 1", (number,)
                 )
                 if en in KNOWN_EMPTY_BOOKS.get(_id(db), ()):
-                    assert not r.cursor.fetchone(), f"{en} gap fixed in {db}: drop it from KNOWN_EMPTY_BOOKS"
+                    assert not r.cursor.fetchone(), (
+                        f"{en} gap fixed in {db}: drop it from KNOWN_EMPTY_BOOKS"
+                    )
                 else:
                     assert r.cursor.fetchone(), f"{en} missing in {db}"
                 names[en] = r._native_book_name(number, en)
@@ -195,8 +223,14 @@ def test_herv_missing_verses_restored_from_original_erv():
     """569 verses were empty in HERV_hi although the original ERV has their text (hin2010)."""
     with _open("hi/HERV_hi.SQLite3.gz") as r:
         for ref in (
-            "Galatians 6:9", "2 Peter 3:9", "Deuteronomy 5:1", "Deuteronomy 6:4",
-            "Deuteronomy 6:5", "Deuteronomy 8:3", "Ephesians 1:4", "1 Thessalonians 1:9-10",
+            "Galatians 6:9",
+            "2 Peter 3:9",
+            "Deuteronomy 5:1",
+            "Deuteronomy 6:4",
+            "Deuteronomy 6:5",
+            "Deuteronomy 8:3",
+            "Ephesians 1:4",
+            "1 Thessalonians 1:9-10",
         ):
             _, texto, error = r.resolve(ref)
             assert error is None and texto, ref
@@ -207,12 +241,13 @@ def test_herv_only_merged_members_remain_empty():
     """The 288 rows still empty are 286 verses merged into a neighbouring verse in the
     original ERV plus 2 empty in the original. Update this number only with evidence."""
     with _open("hi/HERV_hi.SQLite3.gz") as r:
-        r.cursor.execute("SELECT COUNT(*) FROM verses WHERE book_number<=730 AND TRIM(COALESCE(text,''))=''")
+        r.cursor.execute(
+            "SELECT COUNT(*) FROM verses WHERE book_number<=730 AND TRIM(COALESCE(text,''))=''"
+        )
         assert r.cursor.fetchone()[0] == 288
         # a merged block resolves as a range, but its member verse alone does not
         assert r.resolve("Hebrews 6:4-6")[2] is None
         assert r.resolve("Hebrews 6:5")[2] is not None
-
 
 
 def test_herv_titus_is_complete():
@@ -244,7 +279,9 @@ def test_niv_john_8_is_not_wrapped_in_a_note():
         )
 
 
-@pytest.mark.parametrize("version_id", ["NTB-BR_pt", "BTNT_en", "NTBT_es", "RVR1909_es"])
+@pytest.mark.parametrize(
+    "version_id", ["NTB-BR_pt", "BTNT_en", "NTBT_es", "RVR1909_es"]
+)
 def test_version_suffix_reference_resolves_against_real_db(version_id):
     """A reference with the version ID appended (hyphenated or 7 chars long) resolves like a bare one."""
     version, lang = version_id.rsplit("_", 1)

@@ -25,7 +25,7 @@ except ImportError:
     sys.exit(1)
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
-REPO_ROOT   = Path(__file__).parent.parent
+REPO_ROOT = Path(__file__).parent.parent
 CONFIG_PATH = REPO_ROOT / ".github" / "bible_versions_config.yml"
 README_PATH = REPO_ROOT / "README.md"
 
@@ -54,11 +54,17 @@ def build_version_tables(languages: dict) -> str:
     """Builds the per-language markdown tables from config."""
     blocks = []
     for lang, lang_data in languages.items():
-        rows = [f"### `{lang}` — {lang_data['name']}", "| ID | Name | File | Strong's |", "|----|------|------|----------|"]
+        rows = [
+            f"### `{lang}` — {lang_data['name']}",
+            "| ID | Name | File | Strong's |",
+            "|----|------|------|----------|",
+        ]
         for version_id, version_data in lang_data["versions"].items():
             filename = f"{version_id}_{lang}.SQLite3.gz"
             strong = "✅" if version_data["strong"] else "—"
-            rows.append(f"| {version_id} | {version_data['name']} | `{filename}` | {strong} |")
+            rows.append(
+                f"| {version_id} | {version_data['name']} | `{filename}` | {strong} |"
+            )
         blocks.append("\n".join(rows))
     return "\n\n".join(blocks)
 
@@ -71,7 +77,9 @@ def build_bibliatodo_credits(languages: dict) -> str:
             if version_data.get("source") == "bibliatodo":
                 disclaimer = version_data.get("disclaimer")
                 if not disclaimer:
-                    sys.exit(f"❌ {version_id}: 'source: bibliatodo' requires a disclaimer")
+                    sys.exit(
+                        f"❌ {version_id}: 'source: bibliatodo' requires a disclaimer"
+                    )
                 credit = re.sub(r"\s*https?://\S+$", "", disclaimer.strip())
                 rows.append(f"| {version_id} | `{lang}` | {credit} |")
     return "\n".join(rows)
@@ -94,8 +102,12 @@ def update_readme(languages: dict) -> bool:
 
     original = README_PATH.read_text(encoding="utf-8")
     updated = replace_marker_block(original, "BADGES", build_badges(languages))
-    updated = replace_marker_block(updated, "VERSION-TABLES", build_version_tables(languages))
-    updated = replace_marker_block(updated, "BIBLIATODO-CREDITS", build_bibliatodo_credits(languages))
+    updated = replace_marker_block(
+        updated, "VERSION-TABLES", build_version_tables(languages)
+    )
+    updated = replace_marker_block(
+        updated, "BIBLIATODO-CREDITS", build_bibliatodo_credits(languages)
+    )
 
     if updated == original:
         print("✅ README.md unchanged — no commit needed")

@@ -34,7 +34,9 @@ def _local_root(root: str | os.PathLike | None) -> Path | None:
     if explicit:
         path = Path(explicit).expanduser()
         if not (path / "index.json").is_file():
-            raise DatabaseNotFoundError(f"no index.json in bible_versions checkout {path}")
+            raise DatabaseNotFoundError(
+                f"no index.json in bible_versions checkout {path}"
+            )
         return path
     return books_sot._checkout_root()
 
@@ -76,7 +78,10 @@ def _from_remote(language: str, version: str) -> Path:
             f"cannot reach {books_sot.INDEX_URL} and no cached copy of {version} exists: {exc}"
         ) from exc
     target = cache_dir / entry["file"]
-    if target.is_file() and books_sot.content_hash(target.read_bytes()) == entry["hash"]:
+    if (
+        target.is_file()
+        and books_sot.content_hash(target.read_bytes()) == entry["hash"]
+    ):
         return target
     try:
         data = books_sot._fetch(entry["url"])

@@ -40,26 +40,95 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 # Canonical order of the 66 books (USFM codes); ``libros.orden`` must follow it.
 USFM_ORDER = [
-    "GEN", "EXO", "LEV", "NUM", "DEU", "JOS", "JDG", "RUT", "1SA", "2SA", "1KI",
-    "2KI", "1CH", "2CH", "EZR", "NEH", "EST", "JOB", "PSA", "PRO", "ECC", "SNG",
-    "ISA", "JER", "LAM", "EZK", "DAN", "HOS", "JOL", "AMO", "OBA", "JON", "MIC",
-    "NAM", "HAB", "ZEP", "HAG", "ZEC", "MAL", "MAT", "MRK", "LUK", "JHN", "ACT",
-    "ROM", "1CO", "2CO", "GAL", "EPH", "PHP", "COL", "1TH", "2TH", "1TI", "2TI",
-    "TIT", "PHM", "HEB", "JAS", "1PE", "2PE", "1JN", "2JN", "3JN", "JUD", "REV",
+    "GEN",
+    "EXO",
+    "LEV",
+    "NUM",
+    "DEU",
+    "JOS",
+    "JDG",
+    "RUT",
+    "1SA",
+    "2SA",
+    "1KI",
+    "2KI",
+    "1CH",
+    "2CH",
+    "EZR",
+    "NEH",
+    "EST",
+    "JOB",
+    "PSA",
+    "PRO",
+    "ECC",
+    "SNG",
+    "ISA",
+    "JER",
+    "LAM",
+    "EZK",
+    "DAN",
+    "HOS",
+    "JOL",
+    "AMO",
+    "OBA",
+    "JON",
+    "MIC",
+    "NAM",
+    "HAB",
+    "ZEP",
+    "HAG",
+    "ZEC",
+    "MAL",
+    "MAT",
+    "MRK",
+    "LUK",
+    "JHN",
+    "ACT",
+    "ROM",
+    "1CO",
+    "2CO",
+    "GAL",
+    "EPH",
+    "PHP",
+    "COL",
+    "1TH",
+    "2TH",
+    "1TI",
+    "2TI",
+    "TIT",
+    "PHM",
+    "HEB",
+    "JAS",
+    "1PE",
+    "2PE",
+    "1JN",
+    "2JN",
+    "3JN",
+    "JUD",
+    "REV",
 ]
 
 # MySword book colours, by book_number upper bound (same palette as the other DBs).
 COLORS = (
-    (50, "#ccccff"), (190, "#ffcc99"), (260, "#66ff99"), (340, "#ff9fb4"),
-    (460, "#ffff99"), (500, "#ff6600"), (510, "#00ffff"), (650, "#ffff00"),
-    (720, "#00ff00"), (730, "#ff7c80"),
+    (50, "#ccccff"),
+    (190, "#ffcc99"),
+    (260, "#66ff99"),
+    (340, "#ff9fb4"),
+    (460, "#ffff99"),
+    (500, "#ff6600"),
+    (510, "#00ffff"),
+    (650, "#ffff00"),
+    (720, "#00ff00"),
+    (730, "#ff7c80"),
 )
 
 
 def book_numbers() -> list[int]:
     """The 66 canonical MySword numbers, ascending == canonical order (``bible_books.json``)."""
     data = json.loads((REPO_ROOT / "bible_books.json").read_text("utf-8"))
-    nums = sorted({entry["book_number"] for entry in data["books"].values()})  # aliases share a number
+    nums = sorted(
+        {entry["book_number"] for entry in data["books"].values()}
+    )  # aliases share a number
     if len(nums) != 66:
         sys.exit(f"bible_books.json must list 66 books, found {len(nums)}")
     return nums
@@ -79,11 +148,17 @@ def read_source(s: sqlite3.Connection, lang: str | None, version: str | None):
     if not lang or not version:
         sys.exit("source metadatos lacks idioma/version; pass --lang and --version")
     # A version ID must be one the resolver can strip from a reference (VERSION_ID_PATTERN).
-    if not re.fullmatch(VERSION_ID_PATTERN, version) or not re.fullmatch(r"[a-z]{2,3}", lang):
+    if not re.fullmatch(VERSION_ID_PATTERN, version) or not re.fullmatch(
+        r"[a-z]{2,3}", lang
+    ):
         sys.exit(f"bad version/lang: {version!r}/{lang!r}")
 
-    libros = s.execute("SELECT codigo, orden, nombre FROM libros ORDER BY orden").fetchall()
-    if [c for c, _, _ in libros] != USFM_ORDER or [o for _, o, _ in libros] != list(range(1, 67)):
+    libros = s.execute(
+        "SELECT codigo, orden, nombre FROM libros ORDER BY orden"
+    ).fetchall()
+    if [c for c, _, _ in libros] != USFM_ORDER or [o for _, o, _ in libros] != list(
+        range(1, 67)
+    ):
         sys.exit("libros is not the 66 canonical books in canonical order")
 
     # encabezado / titulo / subtitulo / referencias are optional columns: BibliaTodo only
@@ -181,9 +256,18 @@ def convert(src: Path, lang: str | None, version: str | None, out_dir: Path) -> 
 
 
 def main() -> None:
-    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("source", type=Path, help="BibliaTodo *-sqlite NTBT.sqlite (text edition)")
-    p.add_argument("--out-dir", type=Path, default=REPO_ROOT, help="repo root to write {lang}/ into")
+    p = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    p.add_argument(
+        "source", type=Path, help="BibliaTodo *-sqlite NTBT.sqlite (text edition)"
+    )
+    p.add_argument(
+        "--out-dir",
+        type=Path,
+        default=REPO_ROOT,
+        help="repo root to write {lang}/ into",
+    )
     p.add_argument("--lang")
     p.add_argument("--version")
     a = p.parse_args()
