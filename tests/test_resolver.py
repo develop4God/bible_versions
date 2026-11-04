@@ -26,8 +26,14 @@ class TestParseRef:
         assert parse_en_ref("John 3:16 KJV") == ("John", 3, 16, 16)
         assert parse_en_ref("John ३:१६") == ("John", 3, 16, 16)
 
+    @pytest.mark.parametrize("version", ["NTB-BR", "RVR1909", "KJ2000", "BTNT", "NTBT"])
+    def test_version_suffix_with_hyphen_or_long_id(self, version):
+        assert parse_en_ref(f"John 3:16 {version}") == ("John", 3, 16, 16)
+        assert parse_en_ref(f"1 Corinthians 13:4-7 {version}") == ("1 Corinthians", 13, 4, 7)
+
     def test_unparseable(self):
         assert parse_en_ref("not a ref") is None
+        assert parse_en_ref("John 3:16 -BR") is None
 
 
 class TestCleanVerseText:
