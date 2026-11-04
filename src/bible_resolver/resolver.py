@@ -12,7 +12,7 @@ import os
 import re
 import sqlite3
 import warnings
-from functools import lru_cache
+from functools import cache
 from pathlib import Path
 from typing import NamedTuple, Self
 
@@ -36,7 +36,7 @@ class Resolution(NamedTuple):
     error: str | None
 
 
-@lru_cache(maxsize=None)
+@cache
 def _load_shifts_file() -> dict:
     with open(_VERSIFICATION_SHIFTS_PATH, encoding="utf-8") as source:
         return json.load(source)
@@ -69,10 +69,14 @@ def _db_language_code(code: str | None) -> str | None:
     return "fil" if language == "tl" else language
 
 
+# Version IDs (``KJV``, ``RVR1909``, ``NTB-BR``) that may trail a reference; imported by scripts/convert_bibliatodo.py, scripts/generate_index.py and the tests.
+VERSION_ID_PATTERN = r"[A-Z][A-Z0-9]{1,9}(?:-[A-Z0-9]{1,9})*"
+
+
 def parse_en_ref(cita: str) -> tuple[str, int, int, int] | None:
     """Parse ``John 3:16`` and ``1 Corinthians 13:4-7`` references."""
     cita = cita.strip().translate(_DEVA)
-    cita = re.sub(r"\s+[A-Z][A-Z0-9]{1,5}$", "", cita).strip()
+    cita = re.sub(rf"\s+{VERSION_ID_PATTERN}$", "", cita).strip()
     match = re.match(
         r"^((?:\d\s+)?[A-Za-z]+(?:\s+[A-Za-z]+)*)\s+(\d+):(\d+)(?:-(\d+))?$",
         cita,

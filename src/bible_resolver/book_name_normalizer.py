@@ -15,13 +15,13 @@ from __future__ import annotations
 import json
 import re
 import unicodedata
-from functools import lru_cache
+from functools import cache
 from pathlib import Path
 
 _CONFIG_DIR = Path(__file__).parent / "data" / "book_name_sanitizers"
 
 
-@lru_cache(maxsize=None)
+@cache
 def _load_config(language: str) -> dict:
     path = _CONFIG_DIR / f"{language.lower()}.json"
     if not path.exists():

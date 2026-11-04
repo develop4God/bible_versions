@@ -4,7 +4,7 @@
 <!-- AUTO-GENERATED:BADGES:START -->
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Languages](https://img.shields.io/badge/languages-10-brightgreen.svg)
-![Versions](https://img.shields.io/badge/versions-27-brightgreen.svg)
+![Versions](https://img.shields.io/badge/versions-30-brightgreen.svg)
 <!-- AUTO-GENERATED:BADGES:END -->
 
 Bible versions assets for [Develop4God](https://www.develop4God.com) ministry apps — for God's glory, in service of our mission (Isaiah 55:10-11).
@@ -24,6 +24,7 @@ A machine-readable index of all versions is available in [`index.json`](index.js
 | NIV | New International Version | `NIV_en.SQLite3.gz` | — |
 | KJ2000 | King James 2000 | `KJ2000_en.SQLite3.gz` | — |
 | ESV | English Standard Version | `ESV_en.SQLite3.gz` | — |
+| BTNT | BibliaTodo New Translation | `BTNT_en.SQLite3.gz` | — |
 
 ### `es` — Español
 | ID | Name | File | Strong's |
@@ -33,6 +34,7 @@ A machine-readable index of all versions is available in [`index.json`](index.js
 | NTV | Nueva Traducción Viviente | `NTV_es.SQLite3.gz` | — |
 | RVR1909 | Reina-Valera 1909 | `RVR1909_es.SQLite3.gz` | ✅ |
 | LBLA | La Biblia de las Américas | `LBLA_es.SQLite3.gz` | ✅ |
+| NTBT | Nueva Traducción BibliaTodo | `NTBT_es.SQLite3.gz` | — |
 
 ### `pt` — Português
 | ID | Name | File | Strong's |
@@ -40,6 +42,7 @@ A machine-readable index of all versions is available in [`index.json`](index.js
 | ARC | Almeida Revista e Corrigida | `ARC_pt.SQLite3.gz` | — |
 | NVI | Nova Versão Internacional | `NVI_pt.SQLite3.gz` | — |
 | ARA | Almeida Revista e Atualizada | `ARA_pt.SQLite3.gz` | — |
+| NTB-BR | Nova Tradução BibliaTodo | `NTB-BR_pt.SQLite3.gz` | — |
 
 ### `fr` — Français
 | ID | Name | File | Strong's |
@@ -112,7 +115,7 @@ The `bible_resolver` package (in [`src/bible_resolver/`](src/bible_resolver/)) i
 
 You always call it with the **English** book name, regardless of which language database you're querying. [`bible_books.json`](bible_books.json) is the source of truth mapping EN book names to a `book_number` that's identical across all language DBs (MySword/TheWord standard). The native book name comes from the target DB's own `books` table, then passes through a per-language sanitizer ([`data/book_name_sanitizers/`](src/bible_resolver/data/book_name_sanitizers/)) so citations carry clean names (`यूहन्ना`, not `यूहन्ना रचित सुसमाचार`). The language is read from the DB's `info` table, or passed as `language=`. Known versification differences (e.g. German Joel/Malachi) are remapped via [`versification_shifts.json`](src/bible_resolver/data/versification_shifts.json).
 
-Requires Python 3.12+. `bible_books.json` has a single copy: the repo root, on `main`. In a checkout it is read locally; when installed as a dependency it is downloaded from `main` (10 s timeout, cached under `~/.cache/bible_resolver/`, used offline once cached). Either way its hash is validated against `meta.books_sot.hash` in [`index.json`](index.json); a bad download raises `BooksSotError`. After editing it, run `python3 scripts/generate_index.py` (CI does this on push to `main`). The package does **not** ship the databases: pass the path to a `.SQLite3` or `.SQLite3.gz` file you have downloaded. Empty or missing verses return an `error` instead of blank text.
+Requires Python 3.12+. `bible_books.json` has a single copy: the repo root, on `main`. In a checkout it is read locally; when installed as a dependency it is downloaded from `main` (10 s timeout, cached under `~/.cache/bible_resolver/`, used offline once cached). Either way its hash is validated against `meta.books_sot.hash` in [`index.json`](index.json); a bad download raises `BooksSotError`. After editing it, run `uv run python scripts/generate_index.py` (CI does this on push to `main`). The package does **not** ship the databases: pass the path to a `.SQLite3` or `.SQLite3.gz` file you have downloaded. Empty or missing verses return an `error` instead of blank text.
 
 Add it to a project with [uv](https://docs.astral.sh/uv/):
 
@@ -158,9 +161,21 @@ If you'd like to suggest a new version or language, report an issue with the dat
 
 ## Copyright & Disclaimer
 
-The Bible translation databases in this repository are sourced from [MyBible (ph4.org)](https://www.ph4.org/b4_1.php?l=en). Each translation retains its own copyright and license terms as set by its respective publisher/rights holder — some (e.g. KJV, LSG1910) are public domain, while others (e.g. NIV, ESV) are commercially copyrighted with restrictions on redistribution and usage.
+Most Bible translation databases in this repository are sourced from [MyBible (ph4.org)](https://www.ph4.org/b4_1.php?l=en). Each translation retains its own copyright and license terms as set by its respective publisher/rights holder — some (e.g. KJV, LSG1910) are public domain, while others (e.g. NIV, ESV) are commercially copyrighted with restrictions on redistribution and usage.
 
-This repository does not claim ownership of any Bible text. For authoritative licensing and attribution details on a specific translation, refer to [ph4.org](https://www.ph4.org/b4_1.php?l=en). If you plan to redistribute or use these texts beyond personal/app-internal use, verify the license terms for that specific version first.
+### BibliaTodo translations
+
+<!-- AUTO-GENERATED:BIBLIATODO-CREDITS:START -->
+| Version | Language | Credit |
+|---|---|---|
+| BTNT | `en` | Holy Bible, BibliaTodo New Translation (BTNT). Published by BibliaTodo Bible Society, an imprint of BibliaTodo LLC. |
+| NTBT | `es` | Santa Biblia, Nueva Traducción BibliaTodo (NTBT). Publicada por BibliaTodo Bible Society, sello editorial de BibliaTodo LLC. |
+| NTB-BR | `pt` | Bíblia Sagrada, Nova Tradução BibliaTodo (NTB-BR). Publicada por BibliaTodo Bible Society, selo editorial da BibliaTodo LLC. |
+<!-- AUTO-GENERATED:BIBLIATODO-CREDITS:END -->
+
+These texts come directly from BibliaTodo Bible Society and are distributed under its [free, non-exclusive agreement](https://accounts.bibliatodo.com/es/ntbt/licencia) (v1.3, no royalties). The wording is preserved unchanged, brackets included; only the file format was converted (`scripts/convert_bibliatodo.py`). Apps that show these versions must display the credit above in the language used, legibly and accessibly. Interactive apps must link "BibliaTodo Bible Society" to the page for that language ([es](https://www.bibliatodo.com/ntbt/), [en](https://www.bibliatodo.com/en/ntbt/), [pt](https://www.bibliatodo.com/pt/ntbt/)); print or link-less media must show the full URL. Passages must keep their references and must not be presented as a complete Bible; own commentary or additions must be distinguishable from the text; do not imply BibliaTodo sponsors or endorses the product.
+
+This repository does not claim ownership of any Bible text. For authoritative licensing and attribution details on a specific translation, refer to [ph4.org](https://www.ph4.org/b4_1.php?l=en) or, for BibliaTodo versions, the agreement above. If you plan to redistribute or use these texts beyond personal/app-internal use, verify the license terms for that specific version first.
 
 The code in this repository (scripts, index generation, tooling) is licensed under the [MIT License](LICENSE).
 

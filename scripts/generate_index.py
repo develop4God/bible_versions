@@ -6,10 +6,12 @@ Reads bible_versions_config.yml + scans filesystem → writes index.json.
 
 Validation rules:
   ERROR   config entry with no matching file on disk  → exit 1 (Action fails)
+  ERROR   version ID the resolver cannot strip from a reference → exit 1
+  ERROR   unknown `source` value on a version          → exit 1
   WARNING file on disk with no config entry           → logged, not fatal
 
-Run from repo root:
-  python3 scripts/generate_index.py
+Run from repo root (needs the project installed, hence `uv run`):
+  uv run python scripts/generate_index.py
 
 Exit codes:
   0  → index.json written (or unchanged)
@@ -19,9 +21,9 @@ Exit codes:
 
 import hashlib
 import json
+import re
 import sys
-import os
-from datetime import date
+from datetime import UTC, datetime
 from pathlib import Path
 
 try:
@@ -30,10 +32,21 @@ except ImportError:
     print("❌ PyYAML not found. Run: pip install pyyaml --break-system-packages")
     sys.exit(1)
 
+try:
+    from bible_resolver.resolver import VERSION_ID_PATTERN
+except ImportError:
+    print(
+        "❌ bible_resolver not installed. Run: uv run python scripts/generate_index.py"
+    )
+    sys.exit(1)
+
 # ── Paths ─────────────────────────────────────────────────────────────────────
-REPO_ROOT   = Path(__file__).parent.parent
+REPO_ROOT = Path(__file__).parent.parent
 CONFIG_PATH = REPO_ROOT / ".github" / "bible_versions_config.yml"
-INDEX_PATH  = REPO_ROOT / "index.json"
+INDEX_PATH = REPO_ROOT / "index.json"
+
+# Values allowed in a version's optional `source` key (generate_readme.py builds credits from them).
+ALLOWED_SOURCES = {"bibliatodo"}
 
 
 def load_config() -> dict:
@@ -58,21 +71,49 @@ def validate(config_languages: dict, disk_files: set[str]) -> bool:
     Compares config entries vs disk files.
     Returns True if clean, False if errors found.
     """
-    errors   = []
+    errors = []
     warnings = []
 
-    # config → disk
+    # config → disk; version IDs must be strippable from 'John 3:16 <ID>' references;
+    # `source` must be known and requires the `disclaimer` it is credited with
     for lang, lang_data in config_languages.items():
-        for version_id in lang_data["versions"]:
+        for version_id, version_data in lang_data["versions"].items():
+            if not isinstance(version_data, dict):
+                errors.append(f"  BAD ENTRY '{lang}/{version_id}': expected a mapping")
+                continue
             expected_file = f"{lang}/{version_id}_{lang}.SQLite3.gz"
             if expected_file not in disk_files:
                 errors.append(f"  MISSING FILE: {expected_file}  (declared in config)")
+            if not (
+                isinstance(version_id, str)
+                and re.fullmatch(VERSION_ID_PATTERN, version_id)
+            ):
+                errors.append(
+                    f"  BAD VERSION ID '{lang}/{version_id}': must match {VERSION_ID_PATTERN}"
+                )
+            source = version_data.get("source")
+            if source is None:
+                continue
+            if source not in ALLOWED_SOURCES:
+                errors.append(
+                    f"  BAD source '{source}' on '{lang}/{version_id}': allowed {sorted(ALLOWED_SOURCES)}"
+                )
+            elif not version_data.get("disclaimer"):
+                errors.append(
+                    f"  MISSING disclaimer on '{lang}/{version_id}' (required by source '{source}')"
+                )
 
     # allowed_versions (optional) must only name declared versions
     for lang, lang_data in config_languages.items():
-        unknown = [v for v in lang_data.get("allowed_versions", []) if v not in lang_data["versions"]]
+        unknown = [
+            v
+            for v in lang_data.get("allowed_versions", [])
+            if v not in lang_data["versions"]
+        ]
         if unknown:
-            errors.append(f"  BAD allowed_versions for '{lang}': {unknown} not in its versions")
+            errors.append(
+                f"  BAD allowed_versions for '{lang}': {unknown} not in its versions"
+            )
 
     # disk → config (orphan detection)
     declared_files = {
@@ -103,7 +144,7 @@ def file_hash(path: Path) -> str:
 
 
 def build_index(config: dict) -> dict:
-    base_url  = config["index"]["base_url"].rstrip("/")
+    base_url = config["index"]["base_url"].rstrip("/")
     languages = config["languages"]
 
     out_languages = {}
@@ -113,37 +154,39 @@ def build_index(config: dict) -> dict:
             filename = f"{version_id}_{lang}.SQLite3.gz"
             file_path = REPO_ROOT / lang / filename
             entry = {
-                "name":   version_data["name"],
+                "name": version_data["name"],
                 "strong": version_data["strong"],
-                "file":   filename,
-                "url":    f"{base_url}/{lang}/{filename}",
-                "hash":   file_hash(file_path),
+                "file": filename,
+                "url": f"{base_url}/{lang}/{filename}",
+                "hash": file_hash(file_path),
             }
             if "disclaimer" in version_data:
                 entry["disclaimer"] = version_data["disclaimer"]
             versions_out[version_id] = entry
 
         out_languages[lang] = {
-            "name":             lang_data["name"],
-            "script":           lang_data["script"],
-            "primary_version":  lang_data["primary_version"],
+            "name": lang_data["name"],
+            "script": lang_data["script"],
+            "primary_version": lang_data["primary_version"],
             "fallback_version": lang_data["fallback_version"],
-            "reading_speed":    lang_data["reading_speed"],
-            "versions":         versions_out,
+            "reading_speed": lang_data["reading_speed"],
+            "versions": versions_out,
         }
         if "allowed_versions" in lang_data:
-            out_languages[lang]["allowed_versions"] = list(lang_data["allowed_versions"])
+            out_languages[lang]["allowed_versions"] = list(
+                lang_data["allowed_versions"]
+            )
 
     books_file = "bible_books.json"
     return {
         "meta": {
-            "version":  "1.0.0",
-            "updated":  date.today().isoformat(),
-            "note":     "Auto-generated by generate_index.py via sync_index.yml. Do NOT edit manually. Edit .github/bible_versions_config.yml to add versions.",
+            "version": "1.0.0",
+            "updated": datetime.now(UTC).date().isoformat(),
+            "note": "Auto-generated by generate_index.py via sync_index.yml. Do NOT edit manually. Edit .github/bible_versions_config.yml to add versions.",
             "base_url": base_url,
             "books_sot": {
                 "file": books_file,
-                "url":  f"{base_url}/{books_file}",
+                "url": f"{base_url}/{books_file}",
                 "hash": file_hash(REPO_ROOT / books_file),
             },
         },
@@ -160,7 +203,10 @@ def write_if_changed(new_index: dict) -> bool:
         # Ignore 'updated' date when comparing to avoid noisy commits
         existing_data = json.loads(existing)
         new_data_no_date = {**new_index, "meta": {**new_index["meta"], "updated": ""}}
-        existing_no_date = {**existing_data, "meta": {**existing_data.get("meta", {}), "updated": ""}}
+        existing_no_date = {
+            **existing_data,
+            "meta": {**existing_data.get("meta", {}), "updated": ""},
+        }
         if new_data_no_date == existing_no_date:
             print("✅ index.json unchanged — no commit needed")
             return False
@@ -172,11 +218,13 @@ def write_if_changed(new_index: dict) -> bool:
 
 def main():
     print("─── generate_index.py ───────────────────────────────────")
-    config     = load_config()
+    config = load_config()
     disk_files = scan_files()
 
     print(f"📂 Found {len(disk_files)} SQLite files on disk")
-    print(f"📋 Config declares {sum(len(ld['versions']) for ld in config['languages'].values())} versions across {len(config['languages'])} languages")
+    print(
+        f"📋 Config declares {sum(len(ld['versions']) for ld in config['languages'].values())} versions across {len(config['languages'])} languages"
+    )
 
     if not validate(config["languages"], disk_files):
         print("\n❌ Validation failed — index.json NOT updated")

@@ -19,7 +19,7 @@ import json
 import os
 import urllib.request
 import warnings
-from functools import lru_cache
+from functools import cache
 from pathlib import Path
 
 RAW_BASE = "https://raw.githubusercontent.com/develop4God/bible_versions/main"
@@ -103,12 +103,12 @@ def _load_remote() -> dict[str, int]:
     return books
 
 
-@lru_cache(maxsize=None)
+@cache
 def _load_path(path: str) -> dict[str, int]:
     return _parse(Path(path).read_bytes())
 
 
-@lru_cache(maxsize=None)
+@cache
 def _load_default() -> dict[str, int]:
     root = _checkout_root()
     return _load_checkout(root) if root else _load_remote()

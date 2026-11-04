@@ -11,7 +11,9 @@ from bible_resolver import books_sot as sot
 
 ROOT = Path(__file__).parent.parent
 BOOKS = (ROOT / "bible_books.json").read_bytes()
-GOOD_INDEX = json.dumps({"meta": {"books_sot": {"hash": sot.content_hash(BOOKS)}}}).encode()
+GOOD_INDEX = json.dumps(
+    {"meta": {"books_sot": {"hash": sot.content_hash(BOOKS)}}}
+).encode()
 
 
 @pytest.fixture(autouse=True)
@@ -52,7 +54,9 @@ def test_index_hash_matches_root_file():
 def test_content_hash_matches_generate_index_scheme():
     import importlib.util
 
-    spec = importlib.util.spec_from_file_location("gi", ROOT / "scripts" / "generate_index.py")
+    spec = importlib.util.spec_from_file_location(
+        "gi", ROOT / "scripts" / "generate_index.py"
+    )
     gi = importlib.util.module_from_spec(spec)
     try:
         spec.loader.exec_module(gi)
@@ -70,7 +74,9 @@ def test_checkout_is_used_without_network(monkeypatch):
 
 def test_checkout_hash_drift_warns(monkeypatch, tmp_path):
     (tmp_path / "bible_books.json").write_bytes(BOOKS)
-    (tmp_path / "index.json").write_text('{"meta": {"books_sot": {"hash": "deadbeef"}}}')
+    (tmp_path / "index.json").write_text(
+        '{"meta": {"books_sot": {"hash": "deadbeef"}}}'
+    )
     monkeypatch.setattr(sot, "_checkout_root", lambda: tmp_path)
     with pytest.warns(UserWarning, match="differs from index.json"):
         assert sot.load_books_sot()["John"] == 500
@@ -107,6 +113,12 @@ def test_offline_uses_cache_else_clear_error(monkeypatch):
 
 def test_malformed_remote_file_raises(monkeypatch):
     bad = b'{"nope": 1}'
-    fake_net(monkeypatch, books=bad, index=json.dumps({"meta": {"books_sot": {"hash": sot.content_hash(bad)}}}).encode())
+    fake_net(
+        monkeypatch,
+        books=bad,
+        index=json.dumps(
+            {"meta": {"books_sot": {"hash": sot.content_hash(bad)}}}
+        ).encode(),
+    )
     with pytest.raises(BooksSotError, match="malformed"):
         sot.load_books_sot()
