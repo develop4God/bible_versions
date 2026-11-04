@@ -78,8 +78,12 @@ def convert(src: Path, lang: str | None, version: str | None, out_dir: Path) -> 
         sys.exit("libros is not the 66 canonical books in canonical order")
     number = {code: n for (code, _, _), n in zip(libros, book_numbers())}
 
+    # encabezado / titulo / subtitulo / referencias are optional columns: BibliaTodo only
+    # includes them when the edition has data (the EN and PT text editions have none).
+    have = {r[1] for r in s.execute("PRAGMA table_info(versiculos)")}
+    opt = [c if c in have else "NULL" for c in ("encabezado", "titulo", "subtitulo")]
     verses = s.execute(
-        "SELECT libro, capitulo, versiculo, texto, encabezado, titulo, subtitulo "
+        f"SELECT libro, capitulo, versiculo, texto, {', '.join(opt)} "
         "FROM versiculos ORDER BY libro, capitulo, versiculo"
     ).fetchall()
     if not verses or any(not v[3].strip() for v in verses):

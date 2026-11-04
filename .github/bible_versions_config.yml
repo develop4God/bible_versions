@@ -39,6 +39,7 @@ languages:
       NIV: { name: "New International Version", strong: false }
       KJ2000: { name: "King James 2000", strong: false }
       ESV: { name: "English Standard Version", strong: false }
+      BTNT: { name: "BibliaTodo New Translation", strong: false, disclaimer: "Holy Bible, BibliaTodo New Translation (BTNT). Published by BibliaTodo Bible Society, an imprint of BibliaTodo LLC. https://www.bibliatodo.com/en/ntbt/" }
 
   es:
     name: "Español"
@@ -64,6 +65,7 @@ languages:
       ARC: { name: "Almeida Revista e Corrigida", strong: false }
       NVI: { name: "Nova Versão Internacional", strong: false }
       ARA: { name: "Almeida Revista e Atualizada", strong: false, disclaimer: "© 1993 Sociedade Bíblica do Brasil. Todos os direitos reservados." }
+      NTB-BR: { name: "Nova Tradução BibliaTodo", strong: false, disclaimer: "Bíblia Sagrada, Nova Tradução BibliaTodo (NTB-BR). Publicada por BibliaTodo Bible Society, selo editorial da BibliaTodo LLC. https://www.bibliatodo.com/pt/ntbt/" }
 
   fr:
     name: "Français"

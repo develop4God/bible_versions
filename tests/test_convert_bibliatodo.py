@@ -73,3 +73,22 @@ def test_rejects_bad_sources(tmp_path, kw):
     make_source(tmp_path / "src.sqlite", **kw)
     with pytest.raises(SystemExit):
         conv.convert(tmp_path / "src.sqlite", None, None, tmp_path / "o")
+
+
+def test_optional_title_columns_may_be_absent(tmp_path):
+    """EN/PT text editions ship versiculos(libro, capitulo, versiculo, texto) only."""
+    make_source(tmp_path / "full.sqlite")
+    s = sqlite3.connect(tmp_path / "src.sqlite")
+    s.executescript(
+        "CREATE TABLE libros(codigo TEXT PRIMARY KEY, orden INTEGER, nombre TEXT);"
+        "CREATE TABLE versiculos(libro TEXT, capitulo INT, versiculo INT, texto TEXT);"
+        "CREATE TABLE metadatos(clave TEXT PRIMARY KEY, valor TEXT);"
+    )
+    for i, code in enumerate(conv.USFM_ORDER, 1):
+        s.execute("INSERT INTO libros VALUES(?,?,?)", (code, i, code))
+        s.execute("INSERT INTO versiculos VALUES(?,1,1,'t')", (code,))
+    s.executemany("INSERT INTO metadatos VALUES(?,?)", [("schema", "3"), ("idioma", "en"), ("version", "BTNT")])
+    s.commit()
+    s.close()
+    db = read(conv.convert(tmp_path / "src.sqlite", None, None, tmp_path / "o"))
+    assert db.execute("SELECT COUNT(*) FROM stories").fetchone() == (0,)

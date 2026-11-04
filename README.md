@@ -4,7 +4,7 @@
 <!-- AUTO-GENERATED:BADGES:START -->
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Languages](https://img.shields.io/badge/languages-10-brightgreen.svg)
-![Versions](https://img.shields.io/badge/versions-28-brightgreen.svg)
+![Versions](https://img.shields.io/badge/versions-30-brightgreen.svg)
 <!-- AUTO-GENERATED:BADGES:END -->
 
 Bible versions assets for [Develop4God](https://www.develop4God.com) ministry apps — for God's glory, in service of our mission (Isaiah 55:10-11).
@@ -24,6 +24,7 @@ A machine-readable index of all versions is available in [`index.json`](index.js
 | NIV | New International Version | `NIV_en.SQLite3.gz` | — |
 | KJ2000 | King James 2000 | `KJ2000_en.SQLite3.gz` | — |
 | ESV | English Standard Version | `ESV_en.SQLite3.gz` | — |
+| BTNT | BibliaTodo New Translation | `BTNT_en.SQLite3.gz` | — |
 
 ### `es` — Español
 | ID | Name | File | Strong's |
@@ -41,6 +42,7 @@ A machine-readable index of all versions is available in [`index.json`](index.js
 | ARC | Almeida Revista e Corrigida | `ARC_pt.SQLite3.gz` | — |
 | NVI | Nova Versão Internacional | `NVI_pt.SQLite3.gz` | — |
 | ARA | Almeida Revista e Atualizada | `ARA_pt.SQLite3.gz` | — |
+| NTB-BR | Nova Tradução BibliaTodo | `NTB-BR_pt.SQLite3.gz` | — |
 
 ### `fr` — Français
 | ID | Name | File | Strong's |

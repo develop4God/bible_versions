@@ -49,6 +49,14 @@
           "file": "ESV_en.SQLite3.gz",
           "url": "https://raw.githubusercontent.com/develop4God/bible_versions/main/en/ESV_en.SQLite3.gz",
           "hash": "2716d368b9d3d176"
+        },
+        "BTNT": {
+          "name": "BibliaTodo New Translation",
+          "strong": false,
+          "file": "BTNT_en.SQLite3.gz",
+          "url": "https://raw.githubusercontent.com/develop4God/bible_versions/main/en/BTNT_en.SQLite3.gz",
+          "hash": "2db8fec7578865c6",
+          "disclaimer": "Holy Bible, BibliaTodo New Translation (BTNT). Published by BibliaTodo Bible Society, an imprint of BibliaTodo LLC. https://www.bibliatodo.com/en/ntbt/"
         }
       },
       "allowed_versions": [
@@ -145,6 +153,14 @@
           "url": "https://raw.githubusercontent.com/develop4God/bible_versions/main/pt/ARA_pt.SQLite3.gz",
           "hash": "d59e69943d12f776",
           "disclaimer": "© 1993 Sociedade Bíblica do Brasil. Todos os direitos reservados."
+        },
+        "NTB-BR": {
+          "name": "Nova Tradução BibliaTodo",
+          "strong": false,
+          "file": "NTB-BR_pt.SQLite3.gz",
+          "url": "https://raw.githubusercontent.com/develop4God/bible_versions/main/pt/NTB-BR_pt.SQLite3.gz",
+          "hash": "0158a80726d37050",
+          "disclaimer": "Bíblia Sagrada, Nova Tradução BibliaTodo (NTB-BR). Publicada por BibliaTodo Bible Society, selo editorial da BibliaTodo LLC. https://www.bibliatodo.com/pt/ntbt/"
         }
       }
     },
