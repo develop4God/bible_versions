@@ -42,6 +42,11 @@ def test_only_trailing_url_is_stripped():
     assert "| See https://x.example for terms. By X. |" in table
 
 
+def test_trailing_whitespace_after_url_is_stripped():
+    table = gen.build_bibliatodo_credits(langs(A={"source": "bibliatodo", "disclaimer": "By X. https://x.example/a \n"}))
+    assert "| By X. |" in table
+
+
 def test_tagged_version_without_disclaimer_exits():
     with pytest.raises(SystemExit):
         gen.build_bibliatodo_credits(langs(NTBT={"source": "bibliatodo"}))
@@ -51,5 +56,6 @@ def test_readme_credit_block_is_in_sync_with_config():
     config = gen.load_config()["languages"]
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     start, end = "<!-- AUTO-GENERATED:BIBLIATODO-CREDITS:START -->", "<!-- AUTO-GENERATED:BIBLIATODO-CREDITS:END -->"
+    assert start in readme and end in readme, "README lost the BIBLIATODO-CREDITS markers"
     block = readme.split(start, 1)[1].split(end, 1)[0].strip()
     assert block == gen.build_bibliatodo_credits(config)

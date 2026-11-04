@@ -7,6 +7,8 @@ from pathlib import Path
 
 import pytest
 
+from bible_resolver import parse_en_ref, resolver
+
 ROOT = Path(__file__).parent.parent
 spec = importlib.util.spec_from_file_location("convert_bibliatodo", ROOT / "scripts" / "convert_bibliatodo.py")
 conv = importlib.util.module_from_spec(spec)
@@ -114,14 +116,23 @@ def convert(tmp_path, lang=None, version=None):
     return conv.convert(tmp_path / "src.sqlite", lang, version, tmp_path / "o")
 
 
+def test_converter_and_resolver_agree_on_version_ids():
+    """A version ID the converter accepts is exactly one the resolver strips from a reference."""
+    assert conv.VERSION_ID_PATTERN == resolver.VERSION_ID_PATTERN
+    for ok in ("KJV", "RVR1909", "NTB-BR", "KJ2000"):
+        assert parse_en_ref(f"John 3:16 {ok}") == ("John", 3, 16, 16)
+    for bad in ("2024", "tst", "TST-", "A" * 11):
+        assert parse_en_ref(f"John 3:16 {bad}") is None
+
+
 def test_lang_and_version_overrides(tmp_path):
     make_source(tmp_path / "src.sqlite")
-    out = convert(tmp_path, lang="pt", version="X-1")
-    assert out == tmp_path / "o" / "pt" / "X-1_pt.SQLite3.gz"
+    out = convert(tmp_path, lang="pt", version="XY-1")
+    assert out == tmp_path / "o" / "pt" / "XY-1_pt.SQLite3.gz"
 
 
 @pytest.mark.parametrize(
-    "lang, version", [("ES", "TST"), ("es", "../evil"), ("es", "a b"), ("e", "TST"), ("es", "-rf"), ("es", "--")]
+    "lang, version", [("ES", "TST"), ("es", "../evil"), ("es", "a b"), ("e", "TST"), ("es", "-rf"), ("es", "--"), ("es", "2024"), ("es", "tst"), ("es", "TST-"), ("es", "A" * 11)]
 )
 def test_rejects_unsafe_lang_or_version(tmp_path, lang, version):
     make_source(tmp_path / "src.sqlite")
@@ -178,8 +189,9 @@ def test_rejects_unknown_book_code(tmp_path):
         convert(tmp_path)
 
 
-def test_source_connection_is_released_on_failure(tmp_path, monkeypatch):
-    make_source(tmp_path / "src.sqlite", schema="2")
+@pytest.mark.parametrize("kw", [{"schema": "2"}, {"empty": True}])
+def test_source_connection_is_released_on_failure(tmp_path, monkeypatch, kw):
+    make_source(tmp_path / "src.sqlite", **kw)
     opened = []
     real_connect = sqlite3.connect
 

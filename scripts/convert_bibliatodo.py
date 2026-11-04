@@ -52,6 +52,11 @@ COLORS = (
 )
 
 
+# Must stay equal to the version-suffix pattern in ``bible_resolver.resolver.parse_en_ref``
+# (enforced by tests): a version ID the resolver cannot strip from a reference is unusable.
+VERSION_ID_PATTERN = r"[A-Z][A-Z0-9]{1,9}(?:-[A-Z0-9]{1,9})*"
+
+
 def book_numbers() -> list[int]:
     """The 66 canonical MySword numbers, ascending == canonical order (``bible_books.json``)."""
     data = json.loads((REPO_ROOT / "bible_books.json").read_text("utf-8"))
@@ -74,7 +79,7 @@ def read_source(s: sqlite3.Connection, lang: str | None, version: str | None):
     version = version or meta.get("version")
     if not lang or not version:
         sys.exit("source metadatos lacks idioma/version; pass --lang and --version")
-    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9-]*", version) or not re.fullmatch(r"[a-z]{2,3}", lang):
+    if not re.fullmatch(VERSION_ID_PATTERN, version) or not re.fullmatch(r"[a-z]{2,3}", lang):
         sys.exit(f"bad version/lang: {version!r}/{lang!r}")
 
     libros = s.execute("SELECT codigo, orden, nombre FROM libros ORDER BY orden").fetchall()

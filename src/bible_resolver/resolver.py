@@ -69,10 +69,14 @@ def _db_language_code(code: str | None) -> str | None:
     return "fil" if language == "tl" else language
 
 
+# Version IDs (``KJV``, ``RVR1909``, ``NTB-BR``) that may trail a reference; mirrored in scripts/convert_bibliatodo.py.
+VERSION_ID_PATTERN = r"[A-Z][A-Z0-9]{1,9}(?:-[A-Z0-9]{1,9})*"
+
+
 def parse_en_ref(cita: str) -> tuple[str, int, int, int] | None:
     """Parse ``John 3:16`` and ``1 Corinthians 13:4-7`` references."""
     cita = cita.strip().translate(_DEVA)
-    cita = re.sub(r"\s+[A-Z][A-Z0-9]{1,9}(?:-[A-Z0-9]{1,9})*$", "", cita).strip()
+    cita = re.sub(rf"\s+{VERSION_ID_PATTERN}$", "", cita).strip()
     match = re.match(
         r"^((?:\d\s+)?[A-Za-z]+(?:\s+[A-Za-z]+)*)\s+(\d+):(\d+)(?:-(\d+))?$",
         cita,
