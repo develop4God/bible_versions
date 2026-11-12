@@ -22,8 +22,8 @@ def test_allowed_versions_are_declared_versions_and_include_primary_and_fallback
     assert {entry["primary_version"], entry["fallback_version"]} <= set(allowed)
 
 
-def test_english_content_may_cite_kj2000():
-    assert LANGS["en"]["allowed_versions"] == ["KJV", "NIV", "KJ2000"]
+def test_english_content_may_cite_kj2000_and_bsb():
+    assert LANGS["en"]["allowed_versions"] == ["KJV", "NIV", "KJ2000", "BSB"]
 
 
 def test_languages_without_the_field_keep_the_default():

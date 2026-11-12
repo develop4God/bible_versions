@@ -35,7 +35,7 @@ languages:
     # Versions content (devotionals, encounters, discovery) may cite. Optional: when omitted
     # it defaults to [primary_version, fallback_version]. KJ2000 is allowed because the
     # English encounters/discovery text is KJ2000 wording.
-    allowed_versions: [KJV, NIV, KJ2000]
+    allowed_versions: [KJV, NIV, KJ2000, BSB]
     reading_speed: { unit: wpm, rate: 200 }
     versions:
       KJV: { name: "King James Version", strong: true, disclaimer: "Public Domain (King James Version, 1611/1769)." }
@@ -43,6 +43,7 @@ languages:
       KJ2000: { name: "King James 2000", strong: false }
       ESV: { name: "English Standard Version", strong: false }
       BTNT: { source: bibliatodo, name: "BibliaTodo New Translation", strong: false, disclaimer: "Holy Bible, BibliaTodo New Translation (BTNT). Published by BibliaTodo Bible Society, an imprint of BibliaTodo LLC. https://www.bibliatodo.com/en/ntbt/" }
+      BSB: { name: "Berean Standard Bible", strong: false, disclaimer: "The Holy Bible, Berean Standard Bible (BSB). Dedicated to the public domain by Bible Hub on April 30, 2023. https://berean.bible/" }
 
   es:
     name: "Español"
