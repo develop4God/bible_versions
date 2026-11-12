@@ -305,4 +305,16 @@ def test_bsb_omitted_verse_is_an_error_not_blank_text():
     with _open("en/BSB_en.SQLite3.gz") as r:
         res = r.resolve("Matthew 17:21")
     assert res.texto is None
-    assert res.error
+    assert "empty" in res.error and "not found" not in res.error
+
+
+def test_bsb_range_skips_the_omitted_verse():
+    with _open("en/BSB_en.SQLite3.gz") as r:
+        res = r.resolve("Matthew 17:20-22")
+    assert res.error is None, res.error
+    assert res.cita == "Matthew 17:20-22"
+    assert (
+        "prayer and fasting" not in res.texto
+    )  # verse 21 is skipped, 20 and 22 remain
+    assert "Because you have so little faith" in res.texto
+    assert "The Son of Man is about to be delivered" in res.texto

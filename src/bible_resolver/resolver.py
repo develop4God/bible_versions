@@ -110,7 +110,10 @@ def fetch_text(
     v_start: int,
     v_end: int,
 ) -> str | None:
-    """Fetch and sanitize a complete verse range, or return ``None``."""
+    """Fetch and sanitize a verse range, or return ``None`` if a verse row is missing.
+
+    Omitted verses (NULL text) are skipped; a range made only of them yields ``""``.
+    """
     cursor.execute(
         "SELECT verse, text FROM verses "
         "WHERE book_number=? AND chapter=? AND verse>=? AND verse<=? "
@@ -120,9 +123,8 @@ def fetch_text(
     rows = cursor.fetchall()
     if len({verse for verse, _ in rows}) != v_end - v_start + 1:
         return None  # a verse in the range is missing: never return a partial range
-    if any(text is None for _, text in rows):
-        return None
-    return clean_verse_text(" ".join(text for _, text in rows))
+    # NULL text marks a verse the edition omits (e.g. BSB Matthew 17:21): skip it.
+    return clean_verse_text(" ".join(text for _, text in rows if text is not None))
 
 
 class VerseResolver:

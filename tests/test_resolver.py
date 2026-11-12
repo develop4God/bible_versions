@@ -136,11 +136,24 @@ class TestResolveErrors:
             assert "unknown book" in r.resolve("Nonexistent 1:1")[2]
             assert "chapter has 1 verses" in r.resolve("Genesis 1:9")[2]
 
-    def test_null_text_cell_is_not_found(self, make_db):
+    def test_null_text_verse_is_skipped_inside_a_range(self, make_db):
         path = make_db([(10, "Genesis")], [(10, 1, 1, "a"), (10, 1, 2, None)])
         with VerseResolver(path) as r:
-            assert r.resolve("Genesis 1:1-2")[0] is None
+            assert r.resolve("Genesis 1:1-2") == ("Genesis 1:1-2", "a", None)
             assert r.resolve("Genesis 1:1")[0] == "Genesis 1:1"
+
+    def test_null_text_verse_alone_or_in_an_all_null_range_is_empty_not_missing(
+        self, make_db
+    ):
+        path = make_db(
+            [(10, "Genesis")],
+            [(10, 1, 1, "a"), (10, 1, 2, None), (10, 1, 3, None)],
+        )
+        with VerseResolver(path) as r:
+            for ref in ("Genesis 1:2", "Genesis 1:2-3"):
+                cita, texto, error = r.resolve(ref)
+                assert cita is None and texto is None
+                assert "empty" in error and "not found" not in error
 
     def test_range_running_past_chapter_end_is_not_found_not_truncated(self, make_db):
         path = make_db([(10, "Genesis")], [(10, 1, 1, "a"), (10, 1, 2, "b")])

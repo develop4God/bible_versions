@@ -35,7 +35,7 @@ languages:
     # Versions content (devotionals, encounters, discovery) may cite. Optional: when omitted
     # it defaults to [primary_version, fallback_version]. KJ2000 is allowed because the
     # English encounters/discovery text is KJ2000 wording.
-    allowed_versions: [KJV, NIV, KJ2000]
+    allowed_versions: [KJV, NIV, KJ2000, BSB]
     reading_speed: { unit: wpm, rate: 200 }
     versions:
       KJV: { name: "King James Version", strong: true, disclaimer: "Public Domain (King James Version, 1611/1769)." }

@@ -70,7 +70,8 @@
       "allowed_versions": [
         "KJV",
         "NIV",
-        "KJ2000"
+        "KJ2000",
+        "BSB"
       ]
     },
     "es": {
