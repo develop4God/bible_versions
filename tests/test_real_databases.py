@@ -280,7 +280,7 @@ def test_niv_john_8_is_not_wrapped_in_a_note():
 
 
 @pytest.mark.parametrize(
-    "version_id", ["NTB-BR_pt", "BTNT_en", "NTBT_es", "RVR1909_es"]
+    "version_id", ["NTB-BR_pt", "BTNT_en", "BSB_en", "NTBT_es", "RVR1909_es"]
 )
 def test_version_suffix_reference_resolves_against_real_db(version_id):
     """A reference with the version ID appended (hyphenated or 7 chars long) resolves like a bare one."""
@@ -291,3 +291,62 @@ def test_version_suffix_reference_resolves_against_real_db(version_id):
     assert bare.error is None, bare.error
     assert suffixed.error is None, f"suffix '{version}' not stripped: {suffixed.error}"
     assert (suffixed.cita, suffixed.texto) == (bare.cita, bare.texto)
+
+
+def test_bsb_john_3_16_resolves():
+    with _open("en/BSB_en.SQLite3.gz") as r:
+        res = r.resolve("John 3:16")
+    assert res.error is None, res.error
+    assert res.texto.startswith("For God so loved the world")
+
+
+def test_bsb_omitted_verse_is_an_error_not_blank_text():
+    """BSB leaves late-manuscript verses (e.g. Matthew 17:21) NULL; they must not resolve as text."""
+    with _open("en/BSB_en.SQLite3.gz") as r:
+        res = r.resolve("Matthew 17:21")
+    assert res.texto is None
+    assert res.error
+
+
+def test_bsb_range_containing_an_omitted_verse_is_not_returned_partial():
+    with _open("en/BSB_en.SQLite3.gz") as r:
+        res = r.resolve("Matthew 17:20-22")
+    assert res.texto is None
+    assert res.error
+
+
+def test_jcb_range_with_missing_verse_is_not_returned_partial():
+    """JCB stores NULL for missing data, not for omitted verses: never return a partial range."""
+    with _open("ja/JCB_ja.SQLite3.gz") as r:
+        res = r.resolve("Genesis 1:3-6")
+    assert res.texto is None and "not found" in res.error
+
+
+BSB_OMITTED_VERSES = [
+    (470, 17, 21),
+    (470, 18, 11),
+    (470, 23, 14),
+    (480, 7, 16),
+    (480, 9, 44),
+    (480, 9, 46),
+    (480, 11, 26),
+    (480, 15, 28),
+    (490, 17, 36),
+    (490, 23, 17),
+    (500, 5, 4),
+    (510, 8, 37),
+    (510, 15, 34),
+    (510, 24, 7),
+    (510, 28, 29),
+    (520, 16, 24),
+]
+
+
+def test_bsb_null_verses_are_exactly_the_known_omitted_set():
+    """A stray NULL elsewhere would be silently skipped in ranges: pin the set."""
+    with _open("en/BSB_en.SQLite3.gz") as r:
+        r.cursor.execute(
+            "SELECT book_number, chapter, verse FROM verses WHERE text IS NULL "
+            "ORDER BY book_number, chapter, verse"
+        )
+        assert r.cursor.fetchall() == BSB_OMITTED_VERSES
