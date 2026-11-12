@@ -280,7 +280,7 @@ def test_niv_john_8_is_not_wrapped_in_a_note():
 
 
 @pytest.mark.parametrize(
-    "version_id", ["NTB-BR_pt", "BTNT_en", "NTBT_es", "RVR1909_es"]
+    "version_id", ["NTB-BR_pt", "BTNT_en", "BSB_en", "NTBT_es", "RVR1909_es"]
 )
 def test_version_suffix_reference_resolves_against_real_db(version_id):
     """A reference with the version ID appended (hyphenated or 7 chars long) resolves like a bare one."""
@@ -291,3 +291,18 @@ def test_version_suffix_reference_resolves_against_real_db(version_id):
     assert bare.error is None, bare.error
     assert suffixed.error is None, f"suffix '{version}' not stripped: {suffixed.error}"
     assert (suffixed.cita, suffixed.texto) == (bare.cita, bare.texto)
+
+
+def test_bsb_john_3_16_resolves():
+    with _open("en/BSB_en.SQLite3.gz") as r:
+        res = r.resolve("John 3:16")
+    assert res.error is None, res.error
+    assert res.texto.startswith("For God so loved the world")
+
+
+def test_bsb_omitted_verse_is_an_error_not_blank_text():
+    """BSB leaves late-manuscript verses (e.g. Matthew 17:21) NULL; they must not resolve as text."""
+    with _open("en/BSB_en.SQLite3.gz") as r:
+        res = r.resolve("Matthew 17:21")
+    assert res.texto is None
+    assert res.error

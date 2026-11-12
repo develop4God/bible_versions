@@ -43,6 +43,7 @@ languages:
       KJ2000: { name: "King James 2000", strong: false }
       ESV: { name: "English Standard Version", strong: false }
       BTNT: { source: bibliatodo, name: "BibliaTodo New Translation", strong: false, disclaimer: "Holy Bible, BibliaTodo New Translation (BTNT). Published by BibliaTodo Bible Society, an imprint of BibliaTodo LLC. https://www.bibliatodo.com/en/ntbt/" }
+      BSB: { name: "Berean Standard Bible", strong: false, disclaimer: "The Holy Bible, Berean Standard Bible (BSB). Dedicated to the public domain by Bible Hub on April 30, 2023. https://berean.bible/" }
 
   es:
     name: "Español"
