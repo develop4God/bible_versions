@@ -322,3 +322,41 @@ def test_jcb_range_with_missing_verse_is_not_returned_partial():
     with _open("ja/JCB_ja.SQLite3.gz") as r:
         res = r.resolve("Genesis 1:3-6")
     assert res.texto is None and "not found" in res.error
+
+
+BSB_OMITTED_VERSES = [
+    (470, 17, 21),
+    (470, 18, 11),
+    (470, 23, 14),
+    (480, 7, 16),
+    (480, 9, 44),
+    (480, 9, 46),
+    (480, 11, 26),
+    (480, 15, 28),
+    (490, 17, 36),
+    (490, 23, 17),
+    (500, 5, 4),
+    (510, 8, 37),
+    (510, 15, 34),
+    (510, 24, 7),
+    (510, 28, 29),
+    (520, 16, 24),
+]
+
+
+def test_bsb_null_verses_are_exactly_the_known_omitted_set():
+    """A stray NULL elsewhere would be silently skipped in ranges: pin the set."""
+    with _open("en/BSB_en.SQLite3.gz") as r:
+        r.cursor.execute(
+            "SELECT book_number, chapter, verse FROM verses WHERE text IS NULL "
+            "ORDER BY book_number, chapter, verse"
+        )
+        assert r.cursor.fetchall() == BSB_OMITTED_VERSES
+
+
+def test_every_omitted_verse_version_is_a_real_database():
+    from bible_resolver.resolver import _load_omitted_verse_versions
+
+    for stem in _load_omitted_verse_versions():
+        lang = stem.rsplit("_", 1)[1]
+        assert (ROOT / lang / f"{stem}.SQLite3.gz").is_file(), stem
