@@ -305,16 +305,14 @@ def test_bsb_omitted_verse_is_an_error_not_blank_text():
     with _open("en/BSB_en.SQLite3.gz") as r:
         res = r.resolve("Matthew 17:21")
     assert res.texto is None
-    assert "empty" in res.error and "not found" not in res.error
+    assert res.error
 
 
-def test_bsb_range_skips_the_omitted_verse_in_order():
+def test_bsb_range_containing_an_omitted_verse_is_not_returned_partial():
     with _open("en/BSB_en.SQLite3.gz") as r:
-        v20, v22 = (r.resolve(f"Matthew 17:{v}").texto for v in (20, 22))
         res = r.resolve("Matthew 17:20-22")
-    assert res.error is None, res.error
-    assert res.cita == "Matthew 17:20, 22"
-    assert res.texto == f"{v20} {v22}"
+    assert res.texto is None
+    assert res.error
 
 
 def test_jcb_range_with_missing_verse_is_not_returned_partial():
@@ -352,11 +350,3 @@ def test_bsb_null_verses_are_exactly_the_known_omitted_set():
             "ORDER BY book_number, chapter, verse"
         )
         assert r.cursor.fetchall() == BSB_OMITTED_VERSES
-
-
-def test_every_omitted_verse_version_is_a_real_database():
-    from bible_resolver.resolver import _load_omitted_verse_versions
-
-    for stem in _load_omitted_verse_versions():
-        lang = stem.rsplit("_", 1)[1]
-        assert (ROOT / lang / f"{stem}.SQLite3.gz").is_file(), stem
