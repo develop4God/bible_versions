@@ -308,13 +308,17 @@ def test_bsb_omitted_verse_is_an_error_not_blank_text():
     assert "empty" in res.error and "not found" not in res.error
 
 
-def test_bsb_range_skips_the_omitted_verse():
+def test_bsb_range_skips_the_omitted_verse_in_order():
     with _open("en/BSB_en.SQLite3.gz") as r:
+        v20, v22 = (r.resolve(f"Matthew 17:{v}").texto for v in (20, 22))
         res = r.resolve("Matthew 17:20-22")
     assert res.error is None, res.error
-    assert res.cita == "Matthew 17:20-22"
-    assert (
-        "prayer and fasting" not in res.texto
-    )  # verse 21 is skipped, 20 and 22 remain
-    assert "Because you have so little faith" in res.texto
-    assert "The Son of Man is about to be delivered" in res.texto
+    assert res.cita == "Matthew 17:20, 22"
+    assert res.texto == f"{v20} {v22}"
+
+
+def test_jcb_range_with_missing_verse_is_not_returned_partial():
+    """JCB stores NULL for missing data, not for omitted verses: never return a partial range."""
+    with _open("ja/JCB_ja.SQLite3.gz") as r:
+        res = r.resolve("Genesis 1:3-6")
+    assert res.texto is None and "not found" in res.error

@@ -136,24 +136,50 @@ class TestResolveErrors:
             assert "unknown book" in r.resolve("Nonexistent 1:1")[2]
             assert "chapter has 1 verses" in r.resolve("Genesis 1:9")[2]
 
-    def test_null_text_verse_is_skipped_inside_a_range(self, make_db):
+    def test_null_text_cell_is_not_found(self, make_db):
+        """NULL is missing data in general: a range containing it is never returned partial."""
         path = make_db([(10, "Genesis")], [(10, 1, 1, "a"), (10, 1, 2, None)])
         with VerseResolver(path) as r:
-            assert r.resolve("Genesis 1:1-2") == ("Genesis 1:1-2", "a", None)
+            assert r.resolve("Genesis 1:1-2")[0] is None
             assert r.resolve("Genesis 1:1")[0] == "Genesis 1:1"
 
-    def test_null_text_verse_alone_or_in_an_all_null_range_is_empty_not_missing(
-        self, make_db
-    ):
-        path = make_db(
-            [(10, "Genesis")],
-            [(10, 1, 1, "a"), (10, 1, 2, None), (10, 1, 3, None)],
-        )
-        with VerseResolver(path) as r:
-            for ref in ("Genesis 1:2", "Genesis 1:2-3"):
-                cita, texto, error = r.resolve(ref)
-                assert cita is None and texto is None
-                assert "empty" in error and "not found" not in error
+
+class TestOmittedVerseVersions:
+    """Versions listed in omitted_verse_versions.json treat NULL as 'edition omits it'."""
+
+    VERSES = tuple((10, 1, n, None if n in (2, 4, 5) else f"v{n}") for n in range(1, 8))
+
+    def _resolver(self, make_db, name):
+        path = make_db([(10, "Genesis")], self.VERSES, language="en", name=name)
+        return VerseResolver(path)
+
+    def test_range_skips_omitted_verses_and_citation_lists_the_rest(self, make_db):
+        with self._resolver(make_db, "BSB_en.SQLite3") as r:
+            assert r.resolve("Genesis 1:1-7") == (
+                "Genesis 1:1, 3, 6-7",
+                "v1 v3 v6 v7",
+                None,
+            )
+            assert r.resolve("Genesis 1:3") == ("Genesis 1:3", "v3", None)
+
+    def test_range_without_omissions_keeps_the_plain_citation(self, make_db):
+        with self._resolver(make_db, "BSB_en.SQLite3") as r:
+            assert r.resolve("Genesis 1:6-7") == ("Genesis 1:6-7", "v6 v7", None)
+
+    @pytest.mark.parametrize("ref", ["Genesis 1:2", "Genesis 1:4-5"])
+    def test_only_omitted_verses_is_empty_not_missing(self, make_db, ref):
+        with self._resolver(make_db, "BSB_en.SQLite3") as r:
+            cita, texto, error = r.resolve(ref)
+        assert cita is None and texto is None
+        assert "empty" in error and "not found" not in error
+
+    def test_verse_row_missing_from_range_is_still_not_found(self, make_db):
+        with self._resolver(make_db, "BSB_en.SQLite3") as r:
+            assert "not found" in r.resolve("Genesis 1:6-9")[2]
+
+    def test_other_versions_never_return_a_partial_range(self, make_db):
+        with self._resolver(make_db, "JCB_en.SQLite3") as r:
+            assert "not found" in r.resolve("Genesis 1:1-3")[2]
 
     def test_range_running_past_chapter_end_is_not_found_not_truncated(self, make_db):
         path = make_db([(10, "Genesis")], [(10, 1, 1, "a"), (10, 1, 2, "b")])

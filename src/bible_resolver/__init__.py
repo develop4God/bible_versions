@@ -13,6 +13,7 @@ from .resolver import (
     VerseResolver,
     clean_verse_text,
     fetch_text,
+    fetch_verses,
     load_versification_shifts,
     parse_en_ref,
 )
@@ -27,6 +28,7 @@ __all__ = [
     "clean_verse_text",
     "database_path",
     "fetch_text",
+    "fetch_verses",
     "load_books_sot",
     "load_title_aliases",
     "load_versification_shifts",

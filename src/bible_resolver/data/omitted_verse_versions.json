@@ -1,0 +1,4 @@
+{
+  "_comment": "Bible DBs (filename stem, e.g. 'BSB_en') whose NULL verse text means the edition deliberately omits that verse (late-manuscript verses such as Matthew 17:21). Ranges over such verses skip them and the citation lists the verses returned. Every other DB treats NULL as missing data and never returns a partial range.",
+  "versions": ["BSB_en"]
+}

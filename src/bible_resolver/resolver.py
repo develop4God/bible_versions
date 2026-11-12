@@ -22,6 +22,7 @@ from .books_sot import load_books_sot
 _DATA_DIR = Path(__file__).parent / "data"
 _DEVA = str.maketrans("०१२३४५६७८९", "0123456789")
 _VERSIFICATION_SHIFTS_PATH = _DATA_DIR / "versification_shifts.json"
+_OMITTED_VERSE_VERSIONS_PATH = _DATA_DIR / "omitted_verse_versions.json"
 
 
 class UnmappedBookWarning(UserWarning):
@@ -54,6 +55,17 @@ def load_versification_shifts(language: str | None, db_version: str) -> dict[str
     if not language:
         return {}
     return _load_shifts_file().get(language.upper(), {}).get(db_version, {})
+
+
+@cache
+def _load_omitted_verse_versions() -> frozenset[str]:
+    with open(_OMITTED_VERSE_VERSIONS_PATH, encoding="utf-8") as source:
+        return frozenset(json.load(source)["versions"])
+
+
+def omits_verses(db_version: str) -> bool:
+    """True when *db_version* (DB filename stem) stores omitted verses as NULL text."""
+    return db_version in _load_omitted_verse_versions()
 
 
 def _primary_language(code: str | None) -> str | None:
@@ -103,16 +115,19 @@ def clean_verse_text(text: str) -> str:
     return re.sub(r"\s+([,;:.!?])", r"\1", text).strip()
 
 
-def fetch_text(
+def fetch_verses(
     cursor: sqlite3.Cursor,
     book_number: int,
     chapter: int,
     v_start: int,
     v_end: int,
-) -> str | None:
-    """Fetch and sanitize a verse range, or return ``None`` if a verse row is missing.
+    skip_null: bool = False,
+) -> list[tuple[int, str]] | None:
+    """Fetch the ``(verse, text)`` rows of a range, or ``None`` if it cannot be served whole.
 
-    Omitted verses (NULL text) are skipped; a range made only of them yields ``""``.
+    ``None`` means a verse row is missing, or has NULL text while ``skip_null`` is off:
+    a partial range is never returned.  With ``skip_null`` (editions that omit verses),
+    NULL-text verses are dropped; a range made only of them yields ``[]``.
     """
     cursor.execute(
         "SELECT verse, text FROM verses "
@@ -123,8 +138,38 @@ def fetch_text(
     rows = cursor.fetchall()
     if len({verse for verse, _ in rows}) != v_end - v_start + 1:
         return None  # a verse in the range is missing: never return a partial range
-    # NULL text marks a verse the edition omits (e.g. BSB Matthew 17:21): skip it.
-    return clean_verse_text(" ".join(text for _, text in rows if text is not None))
+    if skip_null:
+        return [(verse, text) for verse, text in rows if text is not None]
+    if any(text is None for _, text in rows):
+        return None
+    return rows
+
+
+def _join_text(rows: list[tuple[int, str]]) -> str:
+    return clean_verse_text(" ".join(text for _, text in rows))
+
+
+def fetch_text(
+    cursor: sqlite3.Cursor,
+    book_number: int,
+    chapter: int,
+    v_start: int,
+    v_end: int,
+) -> str | None:
+    """Fetch and sanitize a complete verse range, or return ``None``."""
+    rows = fetch_verses(cursor, book_number, chapter, v_start, v_end)
+    return None if rows is None else _join_text(rows)
+
+
+def _verse_label(verses: list[int]) -> str:
+    """Compact list of verse numbers: ``[1, 3, 6, 7]`` -> ``1, 3, 6-7``."""
+    runs: list[list[int]] = []
+    for verse in verses:
+        if runs and verse == runs[-1][1] + 1:
+            runs[-1][1] = verse
+        else:
+            runs.append([verse, verse])
+    return ", ".join(str(a) if a == b else f"{a}-{b}" for a, b in runs)
 
 
 class VerseResolver:
@@ -166,6 +211,7 @@ class VerseResolver:
             self.versification_shifts = load_versification_shifts(
                 self.language, db_version
             )
+            self.skip_null_verses = omits_verses(db_version)
         except Exception:
             self.close()
             raise
@@ -283,8 +329,13 @@ class VerseResolver:
 
         cursor = self._require_cursor()
         local_name = self._native_book_name(book_number, book_en)
-        texto = fetch_text(cursor, book_number, chapter, v_start, v_end)
+        rows = fetch_verses(
+            cursor, book_number, chapter, v_start, v_end, self.skip_null_verses
+        )
+        texto = None if rows is None else _join_text(rows)
         range_suffix = f"{v_start}-{v_end}" if v_start != v_end else str(v_start)
+        if rows and len(rows) < v_end - v_start + 1:
+            range_suffix = _verse_label([verse for verse, _ in rows])
         if texto is None:
             cursor.execute(
                 "SELECT MAX(verse) FROM verses WHERE book_number=? AND chapter=?",
